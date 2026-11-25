@@ -1,5 +1,5 @@
 // Intergalactic에 없어서 우리가 따로 만든 것, 그리고 외부 서버 대신 패키지 안의 파일을 쓰도록 감싼 것.
-import { createElement, forwardRef } from "react";
+import { createElement, forwardRef, Fragment } from "react";
 import { I18nProvider } from "@semcore/ui/core/lib/utils/enhances/WithI18n";
 import Tag from "@semcore/ui/tag";
 import { NoData as BaseNoData, Error as BaseWidgetError } from "@semcore/ui/widget-empty";
@@ -10,6 +10,12 @@ import {
   PageNotFound as BasePageNotFound,
   ProjectNotFound as BaseProjectNotFound,
 } from "@semcore/ui/errors";
+import {
+  DatePicker as BaseDatePicker,
+  DateRangePicker as BaseDateRangePicker,
+  MonthPicker as BaseMonthPicker,
+  MonthRangePicker as BaseMonthRangePicker,
+} from "@semcore/ui/date-picker";
 import { FLAGS_MARKER, illustrations } from "./generated/assets.js";
 
 // Flags 컴포넌트는 이 표시가 head에 있으면 Semrush 서버의 국기 스타일을 불러오지 않습니다.
@@ -50,6 +56,36 @@ export const Maintenance = withOwnIcon(BaseMaintenance, () => "maintenance");
 export const PageError = withOwnIcon(BasePageError, () => "page_error");
 export const PageNotFound = withOwnIcon(BasePageNotFound, () => "page_not_found");
 export const ProjectNotFound = withOwnIcon(BaseProjectNotFound, () => "project_not_found");
+
+// 날짜 입력란의 빈 자리 표시. 기본 한국어 표시("년년년년. 월월. 일일")가 어색해서 Y, M, D로 바꿉니다.
+const DATE_PLACEHOLDERS = { year: "Y", month: "M", day: "D" };
+const copyParts = (from, to) => {
+  for (const key of Object.keys(from)) if (/^[A-Z]/.test(key)) to[key] = from[key];
+  to.displayName = from.displayName;
+  return to;
+};
+const withDatePlaceholders = (Base) => {
+  // 부품을 직접 조립해 쓸 때도 적용되도록 Trigger 자체를 바꿔 둡니다.
+  const Trigger = copyParts(
+    Base.Trigger,
+    forwardRef((props, ref) => createElement(Base.Trigger, { placeholders: DATE_PLACEHOLDERS, ...props, ref })),
+  );
+  const Wrapped = forwardRef((props, ref) =>
+    createElement(
+      Base,
+      { ...props, ref },
+      props.children ?? createElement(Fragment, null, createElement(Trigger), createElement(Base.Popper)),
+    ),
+  );
+  copyParts(Base, Wrapped);
+  Wrapped.Trigger = Trigger;
+  return Wrapped;
+};
+
+export const DatePicker = withDatePlaceholders(BaseDatePicker);
+export const DateRangePicker = withDatePlaceholders(BaseDateRangePicker);
+export const MonthPicker = withDatePlaceholders(BaseMonthPicker);
+export const MonthRangePicker = withDatePlaceholders(BaseMonthRangePicker);
 
 // 상태 색 규칙: 초록=끝났고 문제없음, 파랑=진행 중, 노랑=사람이 봐야 함, 빨강=문제 있음, 보라=검토, 회색=시작 전
 const STATUS_COLOR = {

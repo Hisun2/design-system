@@ -12,11 +12,12 @@ const header = "// 자동 생성 파일입니다. 직접 고치지 말고 npm ru
 const SUBPATH = { "d3-chart": "chart", "mini-chart": "chart", "feedback-form": "feedback-form" };
 const SKIP = new Set(["core", "icon"]); // core는 내부용, 아이콘은 README의 방법으로 하나씩 불러옵니다.
 const RENAME = { "base-components:Ellipsis": "EllipsisMeasure", "product-head:Info": "ProductHeadInfo", "product-head:Title": "ProductHeadTitle", "widget-empty:Error": "WidgetError", "tooltip:Hint": "TooltipHint", "skeleton:default": "Skeleton" };
-// src/extras.js가 패키지 안의 그림을 쓰도록 감싼 것으로 대신 내보내는 이름
+// src/extras.js가 감싼 것으로 대신 내보내는 이름 (패키지 안의 그림 사용, 날짜 입력란의 빈 자리 표시)
 const REPLACED = new Set([
   "widget-empty:NoData", "widget-empty:Error", "widget-empty:getIconPath",
   "errors:AccessDenied", "errors:Maintenance", "errors:PageError", "errors:PageNotFound", "errors:ProjectNotFound", "errors:getIconPath",
   "illustration:getIllustrationPath",
+  "date-picker:DatePicker", "date-picker:DateRangePicker", "date-picker:MonthPicker", "date-picker:MonthRangePicker",
 ]);
 const pascal = (s) => s.replace(/(^|-)([a-z0-9])/g, (_, __, c) => c.toUpperCase());
 

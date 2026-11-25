@@ -13,7 +13,7 @@ export { default as Checkbox } from "@semcore/ui/checkbox";
 export { PaletteManager, default as ColorPicker, defaultColors } from "@semcore/ui/color-picker";
 export { AnimatedNumber, default as Counter } from "@semcore/ui/counter";
 export { ACCORDION, DataTable, LinkAction, MergedColumnsCell, MergedRowsCell, ROW_GROUP, SelectableRows } from "@semcore/ui/data-table";
-export { DatePicker, DatePickerRoot, DateRangeComparator, DateRangePicker, MonthDateRangeComparator, MonthPicker, MonthRangePicker } from "@semcore/ui/date-picker";
+export { DatePickerRoot, DateRangeComparator, MonthDateRangeComparator } from "@semcore/ui/date-picker";
 export { default as Divider } from "@semcore/ui/divider";
 export { default as Dot } from "@semcore/ui/dot";
 export { default as DragAndDrop } from "@semcore/ui/drag-and-drop";

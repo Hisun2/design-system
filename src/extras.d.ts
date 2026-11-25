@@ -23,3 +23,9 @@ export declare const Maintenance: typeof import("@semcore/ui/errors").Maintenanc
 export declare const PageError: typeof import("@semcore/ui/errors").PageError;
 export declare const PageNotFound: typeof import("@semcore/ui/errors").PageNotFound;
 export declare const ProjectNotFound: typeof import("@semcore/ui/errors").ProjectNotFound;
+
+// 날짜 입력란의 빈 자리 표시를 Y, M, D로 바꾼 것. 쓰는 법은 원래 컴포넌트와 같습니다.
+export declare const DatePicker: typeof import("@semcore/ui/date-picker").DatePicker;
+export declare const DateRangePicker: typeof import("@semcore/ui/date-picker").DateRangePicker;
+export declare const MonthPicker: typeof import("@semcore/ui/date-picker").MonthPicker;
+export declare const MonthRangePicker: typeof import("@semcore/ui/date-picker").MonthRangePicker;

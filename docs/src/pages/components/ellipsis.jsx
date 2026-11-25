@@ -96,7 +96,7 @@ export default function EllipsisPage() {
           <Demo gray column>
             <Card w={240}>
               <Card.Header>
-                <Card.Title ellipsis>{longName}</Card.Title>
+                <Card.Title tag={Text} ellipsis wMax="100%">{longName}</Card.Title>
               </Card.Header>
               <Card.Body><Text size={200}>승인 대기</Text></Card.Body>
             </Card>

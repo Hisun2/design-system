@@ -2,6 +2,9 @@
 :root {
   /* 기본 토큰: 색 원본. 화면 코드에서는 직접 쓰지 않습니다. */
   --ec-blue-50: #E6F2FC;
+  --ec-blue-200: #9CCBF8;
+  --ec-blue-300: #78BBF7;
+  --ec-blue-400: #5FAEF5;
   --ec-blue-500: #0A6FD6;
   --ec-blue-600: #005FA8;
   --ec-blue-700: #004C87;
@@ -56,6 +59,9 @@
   --ec-control-primary-info: var(--ec-blue-500);
   --ec-control-primary-info-hover: var(--ec-blue-600);
   --ec-control-primary-info-active: var(--ec-blue-700);
+  --ec-control-primary-brand: var(--ec-blue-300);
+  --ec-control-primary-brand-hover: var(--ec-blue-400);
+  --ec-control-primary-brand-active: var(--ec-blue-400);
   --ec-control-primary-success: var(--ec-green-600);
   --ec-control-primary-success-hover: var(--ec-green-700);
   --ec-control-primary-critical: var(--ec-red-600);

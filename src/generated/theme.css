@@ -89,9 +89,9 @@
   --intergalactic-control-primary-info: var(--ec-control-primary-info);
   --intergalactic-control-primary-info-hover: var(--ec-control-primary-info-hover);
   --intergalactic-control-primary-info-active: var(--ec-control-primary-info-active);
-  --intergalactic-control-primary-brand: var(--ec-control-primary-info);
-  --intergalactic-control-primary-brand-hover: var(--ec-control-primary-info-hover);
-  --intergalactic-control-primary-brand-active: var(--ec-control-primary-info-active);
+  --intergalactic-control-primary-brand: var(--ec-control-primary-brand);
+  --intergalactic-control-primary-brand-hover: var(--ec-control-primary-brand-hover);
+  --intergalactic-control-primary-brand-active: var(--ec-control-primary-brand-active);
   --intergalactic-control-primary-success: var(--ec-control-primary-success);
   --intergalactic-control-primary-success-hover: var(--ec-control-primary-success-hover);
   --intergalactic-control-primary-success-active: var(--ec-control-primary-success-hover);
