@@ -24,7 +24,8 @@ jobs:
         with:
           node-version: 22
           cache: npm
-      - run: npm ci
+      # npm ci는 Windows에서 만든 잠금 파일에 Linux용 선택 패키지가 빠져 있어 실패합니다. 그래서 npm install을 씁니다.
+      - run: npm install --no-audit --no-fund
       - run: npm run check:docs
       # 사이트 주소가 https://<계정>.github.io/<저장소 이름>/ 이라서 그 경로를 기준으로 빌드합니다.
       - run: npx vite build docs --base=/${{ github.event.repository.name }}/
