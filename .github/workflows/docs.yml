@@ -29,12 +29,15 @@ jobs:
       - run: npm run check:docs
       # 사이트 주소가 https://<계정>.github.io/<저장소 이름>/ 이라서 그 경로를 기준으로 빌드합니다.
       - run: npx vite build docs --base=/${{ github.event.repository.name }}/
-      - uses: actions/upload-pages-artifact@v3
+      # 비공개 저장소(무료 요금제)에서는 Pages를 쓸 수 없으므로 검사와 빌드까지만 합니다.
+      - if: ${{ !github.event.repository.private }}
+        uses: actions/upload-pages-artifact@v3
         with:
           path: docs/dist
 
   deploy:
     needs: build
+    if: ${{ !github.event.repository.private }}
     runs-on: ubuntu-latest
     environment:
       name: github-pages
