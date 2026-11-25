@@ -57,18 +57,47 @@ export const PageError = withOwnIcon(BasePageError, () => "page_error");
 export const PageNotFound = withOwnIcon(BasePageNotFound, () => "page_not_found");
 export const ProjectNotFound = withOwnIcon(BaseProjectNotFound, () => "project_not_found");
 
-// 날짜 입력란의 빈 자리 표시. 기본 한국어 표시("년년년년. 월월. 일일")가 어색해서 Y, M, D로 바꿉니다.
+// 날짜 선택기를 우리 표기(2026-11-25)에 맞춥니다.
+// - 빈 자리 표시: 기본 한국어 표시("년년년년. 월월. 일일") 대신 Y, M, D
+// - 구분 기호: 입력란은 날짜 형식을 언어 설정에서 가져옵니다. 한국어 그대로면 "2026. 11. 25"가 되므로
+//   입력란만 "한국어 + ISO 8601 달력"이라는 언어 코드로 감싸 "2026-11-25"가 되게 합니다.
+//   달력(머리글, 요일, 오늘 버튼)은 바깥의 한국어 설정을 그대로 씁니다.
+// - 이 언어 코드에는 Intergalactic의 번역이 없으므로, 입력란이 쓰는 문구를 한국어로 직접 넣습니다.
 const DATE_PLACEHOLDERS = { year: "Y", month: "M", day: "D" };
+const DATE_LOCALE = "ko-u-ca-iso8601";
+const DATE_INPUT_TEXTS = {
+  [DATE_LOCALE]: {
+    input: "날짜 필드",
+    fromDate: "{date}부터",
+    toDate: "종료 날짜",
+    fromDatePlaceholder: "시작 날짜",
+    toDatePlaceholder: "종료 날짜",
+    unavailableDate: "가능한 날짜를 선택하세요.",
+    unavailableMonth: "가능한 달을 선택하세요.",
+    unavailableEndDate: "가능한 마감일을 선택하세요.",
+    unavailableEndMonth: "가능한 마감월을 선택하세요.",
+    "placeholder-years": "Y",
+    "placeholder-months": "M",
+    "placeholder-days": "D",
+  },
+};
 const copyParts = (from, to) => {
   for (const key of Object.keys(from)) if (/^[A-Z]/.test(key)) to[key] = from[key];
   to.displayName = from.displayName;
   return to;
 };
-const withDatePlaceholders = (Base) => {
+// label: 입력란이 하나인 선택기의 화면 읽기용 이름. 범위 선택기는 "시작 날짜", "종료 날짜"가 이미 들어 있어 주지 않습니다.
+const withDatePlaceholders = (Base, label) => {
   // 부품을 직접 조립해 쓸 때도 적용되도록 Trigger 자체를 바꿔 둡니다.
   const Trigger = copyParts(
     Base.Trigger,
-    forwardRef((props, ref) => createElement(Base.Trigger, { placeholders: DATE_PLACEHOLDERS, ...props, ref })),
+    forwardRef((props, ref) =>
+      createElement(
+        I18nProvider,
+        { value: DATE_LOCALE },
+        createElement(Base.Trigger, { placeholders: DATE_PLACEHOLDERS, i18n: DATE_INPUT_TEXTS, ...(label ? { labelPrefix: label } : {}), ...props, ref }),
+      ),
+    ),
   );
   const Wrapped = forwardRef((props, ref) =>
     createElement(
@@ -82,9 +111,9 @@ const withDatePlaceholders = (Base) => {
   return Wrapped;
 };
 
-export const DatePicker = withDatePlaceholders(BaseDatePicker);
+export const DatePicker = withDatePlaceholders(BaseDatePicker, "날짜");
 export const DateRangePicker = withDatePlaceholders(BaseDateRangePicker);
-export const MonthPicker = withDatePlaceholders(BaseMonthPicker);
+export const MonthPicker = withDatePlaceholders(BaseMonthPicker, "달");
 export const MonthRangePicker = withDatePlaceholders(BaseMonthRangePicker);
 
 // 상태 색 규칙: 초록=끝났고 문제없음, 파랑=진행 중, 노랑=사람이 봐야 함, 빨강=문제 있음, 보라=검토, 회색=시작 전

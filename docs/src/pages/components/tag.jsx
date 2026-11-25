@@ -1,5 +1,5 @@
 import React from "react";
-import { Tag, TagContainer, StatusTag, Box, Flex } from "@ec21rnc/ui";
+import { Tag, TagContainer, StatusTag, Box, Flex, Text } from "@ec21rnc/ui";
 import FolderM from "@semcore/icon/Folder/m";
 import MathPlusM from "@semcore/icon/MathPlus/m";
 import { Page, Section, Sub, P, Rules, Table, Demo, DoDont, Code } from "../../kit.jsx";
@@ -174,7 +174,7 @@ export default function TagPage() {
       <Section title="긴 글자">
         <Demo caption="최대 폭을 정하면 넘치는 글자는 말줄임표로 잘립니다">
           <Tag size="l" wMax={140}>
-            <Tag.Text>해외 거래처 장기 공급 계약</Tag.Text>
+            <Tag.Text tag={Text} ellipsis>해외 거래처 장기 공급 계약</Tag.Text>
           </Tag>
         </Demo>
         <Rules
