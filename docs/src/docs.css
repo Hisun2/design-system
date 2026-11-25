@@ -22,7 +22,7 @@ body { background: var(--ec-bg-surface); }
 .doc-table th { text-align: left; font-weight: var(--ec-fw-regular); color: var(--ec-text-secondary); padding: 8px 12px; border-bottom: 1px solid var(--ec-border); white-space: nowrap; }
 .doc-table td { padding: 10px 12px; border-bottom: 1px solid var(--ec-border); vertical-align: middle; line-height: 22px; }
 .doc-demo { border: 1px solid var(--ec-border); border-radius: var(--ec-radius-card); padding: 24px; margin: 8px 0 16px; display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
-.doc-demo > * { max-width: 100%; }
+/* 주의: 예시 상자의 자식에 max-width를 %로 주지 않습니다. ScrollArea(DataTable 포함)가 그 값을 px로 잘못 읽어 폭을 100px로 줄입니다. */
 .doc-demo.column { flex-direction: column; align-items: stretch; }
 .doc-demo.gray { background: var(--ec-bg-page); border-color: transparent; }
 .doc-demo-cap { flex-basis: 100%; font-size: var(--ec-fs-100); line-height: var(--ec-lh-100); color: var(--ec-text-secondary); }

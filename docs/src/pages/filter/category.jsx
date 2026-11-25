@@ -36,8 +36,8 @@ function Options({ query, multi }) {
   return found.map((c) => (
     <Select.Option key={c.value} value={c.value}>
       {multi ? <Select.Option.Checkbox /> : null}
-      <Select.Option.Content>{c.value}</Select.Option.Content>
-      <Text ml={4} color="text-secondary">{comma(c.count)}</Text>
+      <Select.Option.Text>{c.value}</Select.Option.Text>
+      <Select.Option.Addon ml="auto"><Text color="text-secondary">{comma(c.count)}</Text></Select.Option.Addon>
     </Select.Option>
   ));
 }

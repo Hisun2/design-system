@@ -82,6 +82,8 @@ function RangeFilter({ name, presets, max = 999999999, step = 1 }) {
         <Box py={1}>
           {presets.map((p) => (
             <Dropdown.Item
+              px={3}
+              py={2}
               key={p.label}
               selected={applied && applied.from === p.from && applied.to === p.to}
               onClick={() => apply({ from: p.from, to: p.to })}
