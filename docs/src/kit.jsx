@@ -103,3 +103,14 @@ export const Code = ({ children }) => <code>{children}</code>;
 
 /** 토큰 색 견본. token은 "text-primary"처럼 앞머리 없는 이름. */
 export const Swatch = ({ token }) => <span className="doc-swatch" style={{ background: `var(--ec-${token})` }} />;
+
+/**
+ * 컴포넌트가 없는 것을 설명할 때 쓰는 그림 상자. children으로 직접 그린 <svg>를 넣습니다.
+ * 색은 반드시 토큰으로 줍니다(fill="var(--ec-chart-1)"). caption에는 "설명용 그림입니다. 컴포넌트가 아닙니다."처럼 무엇인지 적습니다.
+ */
+export const Figure = ({ caption, children }) => (
+  <figure className="doc-figure" data-figure style={{ marginLeft: 0, marginRight: 0 }}>
+    {children}
+    {caption ? <figcaption>{caption}</figcaption> : null}
+  </figure>
+);

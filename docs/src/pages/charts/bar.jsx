@@ -1,5 +1,5 @@
 import React from "react";
-import { Box, Skeleton, BarChartSkeleton } from "@ec21rnc/ui";
+import { BarChartSkeleton } from "@ec21rnc/ui";
 import { Chart } from "@ec21rnc/ui/chart";
 import { Page, Section, Sub, P, Rules, Table, Demo, DoDont, Code } from "../../kit.jsx";
 
@@ -42,10 +42,13 @@ const missing = [
   { 월: "3월", 수집: null },
   { 월: "4월", 수집: 520 },
 ];
+// 추세선의 점은 계열 이름을 키로 묶습니다. 키가 계열 이름과 다르면 선이 그려지지 않습니다.
 const trend = {
-  추세: [
-    { x: "1분기", y: 100 },
-    { x: "4분기", y: 150 },
+  계약서: [
+    { x: "1분기", y: 123 },
+    { x: "2분기", y: 146 },
+    { x: "3분기", y: 169 },
+    { x: "4분기", y: 192 },
   ],
 };
 const won = (v) => `${Number(v).toLocaleString("ko-KR")}건`;
@@ -55,7 +58,7 @@ export default function BarChartPage() {
     <Page meta={meta} lead="기간이나 항목마다 값을 막대의 길이로 보여 주는 차트입니다. 값 하나하나를 서로 견줄 때 씁니다. 막대는 세로로도 가로로도 그릴 수 있고, 이 페이지는 세로 막대를 다룹니다.">
       <Section title="언제 쓰는가">
         <Demo caption="월별 수집 건수" column>
-          <Chart.Bar data={monthly} groupKey="월" plotWidth={640} plotHeight={220} aria-label="월별 수집 건수" />
+          <Chart.Bar data={monthly} groupKey="월" yTicksCount={5} plotWidth={640} plotHeight={220} aria-label="월별 수집 건수" />
         </Demo>
         <Rules
           items={[
@@ -79,7 +82,7 @@ export default function BarChartPage() {
 
       <Section title="모양">
         <Demo caption="묶음 막대 (type=&quot;group&quot;, 기본값) — 항목마다 계열을 나란히" column>
-          <Chart.Bar data={quarters} groupKey="분기" plotWidth={640} plotHeight={220} aria-label="분기별 문서 유형별 건수" />
+          <Chart.Bar data={quarters} groupKey="분기" yTicksCount={5} plotWidth={640} plotHeight={220} aria-label="분기별 문서 유형별 건수" />
         </Demo>
         <Table
           head={["요소", "모양"]}
@@ -111,14 +114,15 @@ export default function BarChartPage() {
       </Section>
 
       <Section title="범례와 추세선">
-        <Demo caption="추세선 (trend) — 설명 상자에 추세 값도 함께 나옵니다" column>
-          <Chart.Bar data={quarters} groupKey="분기" trend={trend} plotWidth={640} plotHeight={220} aria-label="추세선이 있는 분기별 문서 건수" />
+        <Demo caption="추세선 (trend) — 범례의 &quot;추세&quot;를 누르면 계약서의 추세선이 나타나고, 다시 누르면 사라집니다" column>
+          <Chart.Bar data={quarters} groupKey="분기" yTicksCount={5} trend={trend} legendProps={{ withTrend: true, trendLabel: "추세" }} plotWidth={640} plotHeight={220} aria-label="추세선이 있는 분기별 문서 건수" />
         </Demo>
         <Rules
           items={[
             "계열이 하나면 범례를 두지 않습니다. 차트 제목으로 충분합니다.",
             "계열이 여럿이면 범례를 둡니다.",
             <>전체 흐름을 짚어 주고 싶으면 <Code>trend</Code>로 추세선을 겹칩니다. 단순한 차트에서는 오히려 어지러워지므로 꼭 필요할 때만 씁니다.</>,
+            <><Code>trend</Code>에는 계열 이름마다 추세선의 점(<Code>x</Code>, <Code>y</Code>)을 줍니다. 범례 끝에 "추세" 항목이 생기고, 처음에는 꺼져 있습니다. 그 계열을 범례에서 끄면 추세선도 함께 사라집니다.</>,
             "추세선을 넣으면 설명 상자에 막대의 값과 추세의 값을 모두 보여 줍니다.",
           ]}
         />
@@ -126,7 +130,7 @@ export default function BarChartPage() {
 
       <Section title="동작">
         <Demo caption="마우스를 올리면 그 항목 뒤에 옅은 바탕이 깔리고 설명 상자가 나옵니다" column>
-          <Chart.Bar data={quarters} groupKey="분기" showTotalInTooltip tooltipValueFormatter={won} plotWidth={640} plotHeight={200} aria-label="설명 상자에 합계가 나오는 막대 차트" />
+          <Chart.Bar data={quarters} groupKey="분기" yTicksCount={5} showTotalInTooltip tooltipValueFormatter={won} plotWidth={640} plotHeight={200} aria-label="설명 상자에 합계가 나오는 막대 차트" />
         </Demo>
         <Rules
           items={[
@@ -140,7 +144,7 @@ export default function BarChartPage() {
 
       <Section title="값의 차이가 아주 클 때">
         <Demo caption="한 항목이 유난히 크면 나머지가 보이지 않습니다" column>
-          <Chart.Bar data={outlier} groupKey="부서" plotWidth={480} plotHeight={200} aria-label="값의 차이가 큰 막대 차트" />
+          <Chart.Bar data={outlier} groupKey="부서" yTicksCount={5} marginY={56} plotWidth={480} plotHeight={200} aria-label="값의 차이가 큰 막대 차트" />
         </Demo>
         <Rules
           items={[
@@ -155,25 +159,25 @@ export default function BarChartPage() {
       <Section title="예외 상황">
         <Sub title="값이 하나일 때">
           <Demo column>
-            <Chart.Bar data={one} groupKey="월" maxBarSize={48} plotWidth={320} plotHeight={160} aria-label="값이 하나인 막대 차트" />
+            <Chart.Bar data={one} groupKey="월" yTicksCount={5} maxBarSize={48} plotWidth={320} plotHeight={160} aria-label="값이 하나인 막대 차트" />
           </Demo>
           <P>막대 하나를 그립니다. 폭은 <Code>maxBarSize</Code>까지만 늘어나므로 차트 전체를 채우지 않습니다.</P>
         </Sub>
         <Sub title="값이 둘일 때">
           <Demo column>
-            <Chart.Bar data={two} groupKey="월" maxBarSize={48} plotWidth={320} plotHeight={160} aria-label="값이 둘인 막대 차트" />
+            <Chart.Bar data={two} groupKey="월" yTicksCount={5} maxBarSize={48} plotWidth={320} plotHeight={160} aria-label="값이 둘인 막대 차트" />
           </Demo>
           <P>막대 둘을 같은 폭으로 그립니다.</P>
         </Sub>
         <Sub title="값이 모두 0일 때">
           <Demo column>
-            <Chart.Bar data={zeros} groupKey="월" plotWidth={480} plotHeight={160} aria-label="값이 모두 0인 막대 차트" />
+            <Chart.Bar data={zeros} groupKey="월" yTicksCount={5} plotWidth={480} plotHeight={160} aria-label="값이 모두 0인 막대 차트" />
           </Demo>
           <P>0은 데이터입니다. 축은 그대로 그리고, 설명 상자에 0을 적습니다. 빈 상태로 바꾸지 않습니다.</P>
         </Sub>
         <Sub title="값이 없는 항목">
           <Demo caption="3월 값 없음 — 막대를 그리지 않고 자리는 비워 둡니다" column>
-            <Chart.Bar data={missing} groupKey="월" plotWidth={480} plotHeight={160} aria-label="값이 없는 항목이 있는 막대 차트" />
+            <Chart.Bar data={missing} groupKey="월" yTicksCount={5} plotWidth={480} plotHeight={160} aria-label="값이 없는 항목이 있는 막대 차트" />
           </Demo>
           <Rules
             items={[
@@ -186,11 +190,7 @@ export default function BarChartPage() {
         </Sub>
         <Sub title="처음 불러올 때">
           <Demo>
-            <Box w={320}>
-              <Skeleton h={160}>
-                <BarChartSkeleton />
-              </Skeleton>
-            </Box>
+            <BarChartSkeleton w={320} h={160} />
           </Demo>
           <P>
             처음 불러오는 동안에는 <Code>BarChartSkeleton</Code>을 보여 줍니다. 차트 제목이 있으면 제목은 먼저 보여 줍니다. 그 밖의 빈 상태는 차트 기본 구조의 빈 상태 규칙을 따릅니다.
@@ -207,11 +207,11 @@ export default function BarChartPage() {
         <Sub title="막대의 순서">
           <DoDont
             good={{
-              demo: <Chart.Bar data={teams} groupKey="부서" plotWidth={260} plotHeight={160} aria-label="큰 순서로 놓은 부서별 건수" />,
+              demo: <Chart.Bar data={teams} groupKey="부서" yTicksCount={5} plotWidth={260} plotHeight={160} aria-label="큰 순서로 놓은 부서별 건수" />,
               text: "순서 없는 항목은 값이 큰 것부터 놓습니다. 기간은 시간 순서(1월→12월)로 놓습니다.",
             }}
             bad={{
-              demo: <Chart.Bar data={unsorted} groupKey="부서" plotWidth={260} plotHeight={160} aria-label="순서 없이 놓은 부서별 건수" />,
+              demo: <Chart.Bar data={unsorted} groupKey="부서" yTicksCount={5} plotWidth={260} plotHeight={160} aria-label="순서 없이 놓은 부서별 건수" />,
               text: "이유 없는 순서로 놓지 않습니다. 어느 것이 큰지 한눈에 보이지 않습니다.",
             }}
           />
@@ -219,11 +219,11 @@ export default function BarChartPage() {
         <Sub title="계열 수">
           <DoDont
             good={{
-              demo: <Chart.Bar data={quarters} groupKey="분기" showLegend={false} plotWidth={260} plotHeight={160} aria-label="계열이 둘인 묶음 막대 차트" />,
+              demo: <Chart.Bar data={quarters} groupKey="분기" yTicksCount={5} showLegend={false} plotWidth={260} plotHeight={160} aria-label="계열이 둘인 묶음 막대 차트" />,
               text: "묶음 막대는 계열 3~4개까지만 씁니다.",
             }}
             bad={{
-              demo: <Chart.Bar data={fiveSeries} groupKey="분기" showLegend={false} plotWidth={260} plotHeight={160} aria-label="계열이 다섯인 묶음 막대 차트" />,
+              demo: <Chart.Bar data={fiveSeries} groupKey="분기" yTicksCount={5} showLegend={false} plotWidth={260} plotHeight={160} aria-label="계열이 다섯인 묶음 막대 차트" />,
               text: "계열을 많이 나란히 놓지 않습니다. 막대가 가늘어져 비교할 수 없습니다. 누적 막대 차트를 씁니다.",
             }}
           />

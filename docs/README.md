@@ -43,8 +43,15 @@ export default function ButtonPage() {
 | `DoDont` | 이렇게 씁니다 / 쓰지 않습니다. `good`, `bad`는 `{ demo?, text }` |
 | `Code` | 코드·토큰 이름 표기 |
 | `Swatch` | 토큰 색 견본. `token="text-primary"` |
+| `Figure` | 컴포넌트가 없는 것을 설명하는 그림 상자. 직접 그린 `<svg>`를 넣고 색은 토큰으로 줌. `caption` |
 
 이 부품 밖의 HTML 태그나 직접 쓴 CSS는 쓰지 않습니다. 필요한 배치는 `@ec21rnc/ui`의 `Flex`, `Box`로 합니다.
+
+## 화면으로 확인하기
+
+`npm run check:docs`는 오류 없이 그려지는지만 봅니다. 글자가 겹치거나, 눌러도 반응이 없거나, 차트가 비어 보이는 문제는 잡지 못합니다.
+예시를 쓰거나 고친 뒤에는 실제 브라우저로 찍은 화면을 봅니다. 방법은 `scripts/shot-docs.mjs` 맨 위에 적혀 있습니다.
+눌러서 바뀌는 예시(탭, 기간 선택, 범례)는 눌러 본 뒤의 화면도 확인합니다.
 
 ## 내용 규칙
 
@@ -55,7 +62,7 @@ export default function ButtonPage() {
 5. **예시 글자는 한국어**로, 일반적인 업무 낱말을 씁니다(거래처, 문서, 승인, 담당자 등). 특정 시스템 이름(이노잉, ERP, 모아)과 실제 사람·회사 이름은 쓰지 않습니다.
 6. **예시는 작게.** 규칙 하나를 보여 주는 데 필요한 만큼만 넣습니다. 팝업류(모달, 드롭다운, 옆 패널)는 처음부터 열어 두지 말고 버튼을 눌러 열게 합니다.
 7. 색·크기를 말할 때는 값 대신 토큰 이름을 적습니다(`--ec-text-secondary`). 값은 `tokens/tokens.json`에서 확인합니다.
-8. 컴포넌트는 `@ec21rnc/ui`(차트는 `@ec21rnc/ui/chart`)에서만 불러옵니다. `@semcore/...`에서 직접 불러오지 않습니다. 아이콘(`@semcore/icon/<이름>/m`)과 그림 컴포넌트(`@semcore/illustration/<이름>`)만 예외입니다. 그림의 주소가 필요하면 `@ec21rnc/ui`의 `getIllustrationPath`를 씁니다.
+8. 컴포넌트는 `@ec21rnc/ui`(차트는 `@ec21rnc/ui/chart`)에서만 불러옵니다. 차트의 축 범위를 정하는 `scaleLinear`, `scaleBand` 등도 `@ec21rnc/ui/chart`에서 불러옵니다. `@semcore/...`에서 직접 불러오지 않습니다. 아이콘(`@semcore/icon/<이름>/m`)과 그림 컴포넌트(`@semcore/illustration/<이름>`)만 예외입니다. 그림의 주소가 필요하면 `@ec21rnc/ui`의 `getIllustrationPath`를 씁니다.
 9. 다 쓴 뒤 `npm run check:docs <묶음>/<이름>`이 통과해야 합니다.
 
 ## 우리가 이미 정한 것

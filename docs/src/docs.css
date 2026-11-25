@@ -16,7 +16,7 @@ body { background: var(--ec-bg-surface); }
 .doc-main p { margin: 0 0 12px; line-height: 22px; }
 .doc-lead { color: var(--ec-text-secondary); margin-bottom: 24px !important; }
 .doc-main ul { margin: 0 0 12px; padding-left: 20px; line-height: 22px; }
-.doc-main code { font: 12px/18px Consolas, monospace; background: var(--ec-bg-page); padding: 2px 6px; border-radius: var(--ec-radius-badge); }
+.doc-main code { white-space: nowrap; font: 12px/18px Consolas, monospace; background: var(--ec-bg-page); padding: 2px 6px; border-radius: var(--ec-radius-badge); }
 .doc-table-wrap { overflow-x: auto; margin: 8px 0 16px; }
 .doc-table { width: 100%; border-collapse: collapse; }
 .doc-table th { text-align: left; font-weight: var(--ec-fw-regular); color: var(--ec-text-secondary); padding: 8px 12px; border-bottom: 1px solid var(--ec-border); white-space: nowrap; }
@@ -34,3 +34,6 @@ body { background: var(--ec-bg-surface); }
 .doc-swatch { display: inline-block; width: 40px; height: 24px; border-radius: var(--ec-radius-control); border: 1px solid var(--ec-border); vertical-align: middle; }
 .doc-failed { color: var(--ec-text-critical); }
 @media (max-width: 860px) { .doc-nav { display: none; } .doc-main { padding: 24px 16px 64px; } }
+.doc-figure { border: 1px solid var(--ec-border); border-radius: var(--ec-radius-card); padding: 24px; margin: 8px 0 16px; }
+.doc-figure svg { display: block; max-width: 100%; height: auto; font-family: var(--ec-font-family); }
+.doc-figure figcaption { font-size: var(--ec-fs-100); line-height: var(--ec-lh-100); color: var(--ec-text-secondary); margin-top: 12px; }

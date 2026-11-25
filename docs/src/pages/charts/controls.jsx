@@ -1,5 +1,5 @@
 import React from "react";
-import { Card, Flex, Box, Button, Tooltip, Pills, Select, Divider, Text, DateRangePicker } from "@ec21rnc/ui";
+import { Card, Flex, Box, Button, Tooltip, Pills, Select, Divider, Text, DateRangePicker, DropdownMenu } from "@ec21rnc/ui";
 import { Chart } from "@ec21rnc/ui/chart";
 import SettingsM from "@semcore/icon/Settings/m";
 import FileExportM from "@semcore/icon/FileExport/m";
@@ -10,17 +10,36 @@ import { Page, Section, Sub, P, Rules, Table, Demo, DoDont, Code } from "../../k
 
 export const meta = { title: "차트 조작", order: 4 };
 
-const monthly = [
-  { 월: 1, 접수: 320, 승인: 260 },
-  { 월: 2, 접수: 410, 승인: 330 },
-  { 월: 3, 접수: 380, 승인: 340 },
-  { 월: 4, 접수: 520, 승인: 410 },
-  { 월: 5, 접수: 610, 승인: 480 },
-  { 월: 6, 접수: 580, 승인: 510 },
-];
-const month = (v) => `${v}월`;
+// 예시 데이터: 2025-12-01부터 2026-11-30까지 날마다의 접수·승인 건수를 정해진 식으로 만듭니다.
+const days = Array.from({ length: 365 }, (_, i) => {
+  const 접수 = Math.round(16 + i * 0.012 + 5 * Math.sin(i / 9) + 3 * Math.sin(i / 2.3));
+  return { date: new Date(2025, 11, 1 + i), 접수, 승인: Math.round(접수 * 0.8 + Math.sin(i / 5)) };
+});
+const periodStart = { "1개월": new Date(2026, 10, 1), "6개월": new Date(2026, 5, 1), "1년": new Date(2025, 11, 1) };
+const teamShare = { "전체 부서": 1, 영업: 0.45, 구매: 0.35, 재무: 0.2 };
+const notes = [new Date(2026, 7, 17), new Date(2026, 10, 9)];
 
-const teamOptions = ["전체 부서", "영업", "구매", "재무"].map((v) => ({ value: v, children: v }));
+const two = (n) => String(n).padStart(2, "0");
+const ymd = (d) => `${d.getFullYear()}-${two(d.getMonth() + 1)}-${two(d.getDate())}`;
+
+/** 고른 기간·단위·부서에 맞춰 차트에 줄 데이터를 만듭니다. 주는 7일씩, 월은 달력의 달로 묶습니다. */
+function buildData(period, unit, team) {
+  const rows = days.filter((d) => d.date >= periodStart[period]);
+  const buckets = new Map();
+  rows.forEach((d, i) => {
+    const key = unit === "일" ? i : unit === "주" ? Math.floor(i / 7) : d.date.getMonth();
+    const bucket = buckets.get(key) ?? { 기간: d.date, 접수: 0, 승인: 0, count: 0 };
+    bucket.접수 += d.접수;
+    bucket.승인 += d.승인;
+    bucket.count += 1;
+    buckets.set(key, bucket);
+  });
+  return [...buckets.values()]
+    .filter((bucket) => unit !== "주" || bucket.count === 7) // 7일을 채우지 못한 마지막 주는 뺍니다.
+    .map(({ 기간, 접수, 승인 }) => ({ 기간, 접수: Math.round(접수 * teamShare[team]), 승인: Math.round(승인 * teamShare[team]) }));
+}
+
+const teamOptions = Object.keys(teamShare).map((v) => ({ value: v, children: v }));
 
 function IconButton({ title, icon: Icon }) {
   return (
@@ -34,9 +53,10 @@ function IconButton({ title, icon: Icon }) {
   );
 }
 
-function Period() {
+/** 기간 고르기. value와 onChange를 주지 않으면 스스로 값을 기억합니다. */
+function Period(props) {
   return (
-    <Pills defaultValue="6개월" aria-label="기간">
+    <Pills defaultValue="6개월" aria-label="기간" {...props}>
       <Pills.Item value="1개월">1개월</Pills.Item>
       <Pills.Item value="6개월">6개월</Pills.Item>
       <Pills.Item value="1년">1년</Pills.Item>
@@ -44,13 +64,108 @@ function Period() {
   );
 }
 
-function Frequency() {
+/** 집계 단위 고르기. noMonth를 주면 "월"을 고를 수 없게 끕니다. */
+function Frequency({ noMonth, ...props }) {
   return (
-    <Pills defaultValue="월" aria-label="집계 단위">
+    <Pills defaultValue="월" aria-label="집계 단위" {...props}>
       <Pills.Item value="일">일</Pills.Item>
       <Pills.Item value="주">주</Pills.Item>
-      <Pills.Item value="월">월</Pills.Item>
+      <Pills.Item value="월" disabled={noMonth}>월</Pills.Item>
     </Pills>
+  );
+}
+
+/** 조작 요소가 실제로 차트를 바꾸는 카드. */
+function ControlsCard() {
+  const [team, setTeam] = React.useState("전체 부서");
+  const [period, setPeriod] = React.useState("6개월");
+  const [unit, setUnit] = React.useState("월");
+  const [showNotes, setShowNotes] = React.useState(false);
+  const [showDots, setShowDots] = React.useState(false);
+  const data = React.useMemo(() => buildData(period, unit, team), [period, unit, team]);
+
+  // 기간이 한 달이면 "월"로 묶을 수 없으므로 "주"로 바꿉니다.
+  const changePeriod = (next) => {
+    setPeriod(next);
+    if (next === "1개월" && unit === "월") setUnit("주");
+  };
+  const monthTicks = unit === "월" || period !== "1개월";
+  // 마지막 눈금은 차트 오른쪽 끝에 걸려 글자가 잘리므로 왼쪽으로 조금 당깁니다.
+  const lastTime = data[data.length - 1].기간.getTime();
+  const tick = (d) => {
+    const label = monthTicks ? `${d.getMonth() + 1}월` : `${two(d.getMonth() + 1)}-${two(d.getDate())}`;
+    return d.getTime() === lastTime ? <Box mr={4}>{label}</Box> : label;
+  };
+  const title = (d) => (unit === "월" ? ymd(d).slice(0, 7) : unit === "주" ? `${ymd(d)}부터 7일` : ymd(d));
+  const ticksCount = period === "1년" ? 12 : period === "6개월" ? 6 : data.length < 6 ? data.length - 1 : 5;
+  // 고른 기간에 든 메모만 표시합니다. 세로 선은 그 날짜가 든 묶음(주·월)의 자리에 긋습니다.
+  const visibleNotes = showNotes
+    ? notes.filter((d) => d >= periodStart[period]).map((d) => ({ value: data.filter((row) => row.기간 <= d).pop().기간 }))
+    : undefined;
+
+  return (
+    <Card w={640}>
+      <Card.Header>
+        <Flex justifyContent="space-between" alignItems="center">
+          <Card.Title>문서 처리 건수</Card.Title>
+          <Flex gap={1}>
+            <DropdownMenu>
+              <DropdownMenu.Trigger tag={Button} use="tertiary" theme="muted" aria-label="내보내기" title="내보내기">
+                <Button.Addon>
+                  <FileExportM />
+                </Button.Addon>
+              </DropdownMenu.Trigger>
+              <DropdownMenu.Menu>
+                <DropdownMenu.Item>그림(PNG)으로 저장</DropdownMenu.Item>
+                <DropdownMenu.Item>표(CSV)로 내보내기</DropdownMenu.Item>
+              </DropdownMenu.Menu>
+            </DropdownMenu>
+            <DropdownMenu>
+              <DropdownMenu.Trigger tag={Button} use="tertiary" theme="muted" aria-label="차트 설정" title="차트 설정">
+                <Button.Addon>
+                  <SettingsM />
+                </Button.Addon>
+              </DropdownMenu.Trigger>
+              <DropdownMenu.Menu>
+                <DropdownMenu.Item onClick={() => setShowDots(!showDots)}>{showDots ? "점 숨기기" : "점 표시하기"}</DropdownMenu.Item>
+              </DropdownMenu.Menu>
+            </DropdownMenu>
+          </Flex>
+        </Flex>
+      </Card.Header>
+      <Card.Body>
+        <Flex justifyContent="space-between" alignItems="center" mb={4}>
+          <Flex gap={2} alignItems="center">
+            <Select options={teamOptions} value={team} onChange={setTeam} aria-label="부서" />
+            <Button active={showNotes} onClick={() => setShowNotes(!showNotes)}>
+              <Button.Addon>
+                <NoteM />
+              </Button.Addon>
+              <Button.Text>메모</Button.Text>
+            </Button>
+          </Flex>
+          <Flex alignItems="center">
+            <Period value={period} onChange={changePeriod} />
+            <Divider orientation="vertical" mx={4} h={20} />
+            <Frequency value={unit} onChange={setUnit} noMonth={period === "1개월"} />
+          </Flex>
+        </Flex>
+        <Chart.Line
+          data={data}
+          groupKey="기간"
+          showDots={showDots}
+          referenceLine={visibleNotes}
+          marginY={48}
+          xTicksCount={ticksCount}
+          yTicksCount={5}
+          plotWidth={592}
+          plotHeight={220}
+          axisXValueFormatter={tick}
+          tooltipTitleFormatter={title}
+          aria-label="기간별 문서 처리 건수"
+        />
+      </Card.Body>
+    </Card>
   );
 }
 
@@ -58,37 +173,8 @@ export default function ChartControlsPage() {
   return (
     <Page meta={meta} lead="차트가 든 카드에서 사용자가 보는 범위와 방식을 바꾸는 조작 요소입니다. 종류마다 놓는 자리가 정해져 있습니다. 차트 자체의 규칙은 차트 기본 구조를 봅니다.">
       <Section title="구성">
-        <Demo caption="위 줄: 제목과 카드 전체 조작 / 아래 줄: 왼쪽은 데이터 고르기, 오른쪽은 기간과 집계 단위">
-          <Card w={640}>
-            <Card.Header>
-              <Flex justifyContent="space-between" alignItems="center">
-                <Card.Title>월별 문서 처리 건수</Card.Title>
-                <Flex gap={1}>
-                  <IconButton title="내보내기" icon={FileExportM} />
-                  <IconButton title="차트 설정" icon={SettingsM} />
-                </Flex>
-              </Flex>
-            </Card.Header>
-            <Card.Body>
-              <Flex justifyContent="space-between" alignItems="center" mb={4}>
-                <Flex gap={2} alignItems="center">
-                  <Select options={teamOptions} defaultValue="전체 부서" aria-label="부서" />
-                  <Button>
-                    <Button.Addon>
-                      <NoteM />
-                    </Button.Addon>
-                    <Button.Text>메모</Button.Text>
-                  </Button>
-                </Flex>
-                <Flex alignItems="center">
-                  <Period />
-                  <Divider orientation="vertical" mx={4} h={20} />
-                  <Frequency />
-                </Flex>
-              </Flex>
-              <Chart.Line data={monthly} groupKey="월" plotWidth={592} plotHeight={220} axisXValueFormatter={month} tooltipTitleFormatter={month} aria-label="월별 문서 처리 건수" />
-            </Card.Body>
-          </Card>
+        <Demo caption="위 줄: 제목과 카드 전체 조작 / 아래 줄: 왼쪽은 데이터 고르기, 오른쪽은 기간과 집계 단위. 부서·메모·기간·단위를 눌러 보면 차트가 바뀝니다. 내보내기는 메뉴만 열립니다.">
+          <ControlsCard />
         </Demo>
         <Table
           head={["종류", "하는 일", "자리"]}

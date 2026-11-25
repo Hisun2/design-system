@@ -5,10 +5,13 @@ import { Page, Section, Sub, P, Rules, Table, Demo, DoDont, Code } from "../../k
 
 export const meta = { title: "작은 차트", order: 22 };
 
-const trend = [12, 15, 14, 19, 17, 22, 21, 26, 24, 29];
-const bars = [4, 7, 5, 9, 6, 11, 8].map((value) => ({ value }));
-const histogram = [3, 5, 4, 6, 8, 7, 9, 12, 10, 13, 11, 14].map((value) => ({ value }));
-const peak = [4, 7, 5, 9, 6, 11, 8].map((value) => ({ value, color: value === 11 ? "var(--ec-chart-7)" : undefined }));
+// 추세 차트는 값을 차트 높이에 대한 비율(0~100)로 받습니다. 자동으로 맞춰 주지 않으므로 가장 큰 값이 90이 되게 바꿔 넣습니다.
+const toHeight = (values) => values.map((value) => Math.round((value / Math.max(...values)) * 90));
+const trend = toHeight([12, 15, 14, 19, 17, 22, 21, 26, 24, 29]);
+const weekdays = toHeight([4, 7, 5, 9, 6, 11, 8]);
+const bars = weekdays.map((value) => ({ value, color: "var(--ec-chart-1)" }));
+const histogram = toHeight([3, 5, 4, 6, 8, 7, 9, 12, 10, 13, 11, 14]).map((value) => ({ value, color: "var(--ec-chart-1)" }));
+const peak = weekdays.map((value) => ({ value, color: value === 90 ? "var(--ec-chart-7)" : "var(--ec-chart-1)" }));
 
 export default function MiniChartPage() {
   return (
@@ -42,6 +45,9 @@ export default function MiniChartPage() {
             <MiniChart.TrendBar data={peak} w={120} h={32} aria-label="요일별 접수 건수, 가장 많은 날 강조" />
           </Demo>
           <P>
+            추세 차트의 값은 차트 높이에 대한 비율(0~100)로 넣습니다. 차트가 값의 범위를 알아서 맞추지 않으므로, 건수 같은 원래 값을 그대로 넣으면 납작하게 그려집니다. 가장 큰 값이 90~100이 되게 바꿔 넣습니다.
+          </P>
+          <P>
             필요하면 가장 높은 값이나 가장 낮은 값을 진한 색으로 표시합니다. 막대는 항목마다 <Code>color</Code>를, 선은 마지막 점의 색(<Code>lastPointColor</Code>)을 줄 수 있습니다.
           </P>
         </Sub>
@@ -69,6 +75,7 @@ export default function MiniChartPage() {
         <Rules
           items={[
             <>기본색은 <Code>--ec-chart-1</Code>입니다. 한 화면의 작은 차트는 모두 같은 색으로 맞춥니다.</>,
+            <>막대(<Code>TrendBar</Code>, <Code>TrendHistogram</Code>)는 색을 주지 않으면 회색으로 그려집니다. 항목마다 <Code>color</Code>를 줍니다.</>,
             <>색을 바꿀 때는 <Code>color</Code>에 차트 색 토큰을 번호 순서대로 줍니다.</>,
             "좋고 나쁨을 색으로 나타낼 때는 상태 색 규칙을 따르고, 숫자나 글자를 반드시 함께 적습니다. 색만으로 뜻을 전하지 않습니다.",
           ]}

@@ -1,7 +1,87 @@
 import React from "react";
-import { Page, Section, Sub, P, Rules, Table, DoDont, Code, Swatch } from "../../kit.jsx";
+import { Page, Section, Sub, P, Rules, Table, DoDont, Code, Swatch, Figure } from "../../kit.jsx";
 
 export const meta = { title: "깔때기 차트", order: 29 };
+
+const fmt = (n) => n.toLocaleString("ko-KR");
+const stages = [
+  { name: "견적 요청", value: 1284 },
+  { name: "견적 발송", value: 912 },
+  { name: "협의", value: 486 },
+  { name: "계약", value: 208 },
+];
+const withZero = [
+  { name: "견적 요청", value: 320 },
+  { name: "견적 발송", value: 140 },
+  { name: "협의", value: 0 },
+  { name: "계약", value: 0 },
+];
+
+/** 한쪽 끝에 맞춘 가로 막대 깔때기. ghost를 주면 앞 단계 길이만큼 연한 막대를 뒤에 깝니다. */
+function FunnelBars({ data, ghost, label }) {
+  const x0 = 88;
+  const maxW = 330;
+  const barH = 32;
+  const gap = 8;
+  const max = data[0].value;
+  const len = (v) => (v === 0 ? 0 : Math.max(2, (v / max) * maxW));
+  return (
+    <svg viewBox={`0 0 560 ${data.length * (barH + gap) - gap}`} width={560} role="img" aria-label={label}>
+      {data.map((d, i) => {
+        const y = i * (barH + gap);
+        const w = len(d.value);
+        const prev = i > 0 ? data[i - 1].value : null;
+        const back = ghost && i > 0 ? len(prev) : 0;
+        return (
+          <g key={d.name}>
+            <text x={x0 - 12} y={y + barH / 2} textAnchor="end" dominantBaseline="central" fontSize={14} fill="var(--ec-text-primary)">{d.name}</text>
+            {back ? <rect x={x0} y={y} width={back} height={barH} fill="var(--ec-chart-13)" /> : null}
+            {w ? <rect x={x0} y={y} width={w} height={barH} fill="var(--ec-chart-1)" /> : null}
+            <text x={x0 + w + 8} y={y + barH / 2} dominantBaseline="central" fontSize={14} fontWeight={500} fill="var(--ec-text-primary)">{fmt(d.value)}건</text>
+            {i > 0 ? (
+              <text x={x0 - 12} y={y - gap / 2} textAnchor="end" dominantBaseline="central" fontSize={12} fill="var(--ec-text-secondary)">
+                ↓ {prev ? `${((d.value / prev) * 100).toFixed(1)}%` : "–"}
+              </text>
+            ) : null}
+          </g>
+        );
+      })}
+    </svg>
+  );
+}
+
+/** 정렬 비교: 왼쪽은 한쪽 끝에 맞춘 막대, 오른쪽은 가운데로 모은 깔때기 모양. */
+function AlignCompare() {
+  const barH = 24;
+  const gap = 4;
+  const maxW = 200;
+  const max = stages[0].value;
+  const top = 28;
+  const row = (i) => top + i * (barH + gap);
+  const w = (v) => (v / max) * maxW;
+  const cx = 420;
+  const trapezoid = stages
+    .map((d, i) => {
+      const next = stages[i + 1] ?? d;
+      const a = w(d.value) / 2;
+      const b = w(next.value) / 2;
+      return `M${cx - a} ${row(i)}H${cx + a}L${cx + b} ${row(i) + barH}H${cx - b}Z`;
+    });
+  return (
+    <svg viewBox={`0 0 560 ${row(stages.length)}`} width={560} role="img" aria-label="한쪽 끝에 맞춘 막대와 가운데로 모은 깔때기 모양의 비교">
+      <text x={20} y={10} dominantBaseline="central" fontSize={12} fontWeight={500} fill="var(--ec-text-primary)">이렇게 씁니다: 한쪽 끝에 맞춘 막대</text>
+      <text x={320} y={10} dominantBaseline="central" fontSize={12} fontWeight={500} fill="var(--ec-text-primary)">쓰지 않습니다: 가운데로 모은 깔때기</text>
+      <line x1={20} x2={20} y1={top - 4} y2={row(stages.length) - gap + 4} stroke="var(--ec-border-control)" />
+      {stages.map((d, i) => (
+        <g key={d.name}>
+          <rect x={20} y={row(i)} width={w(d.value)} height={barH} fill="var(--ec-chart-1)" />
+          <text x={20 + w(d.value) + 8} y={row(i) + barH / 2} dominantBaseline="central" fontSize={12} fill="var(--ec-text-secondary)">{fmt(d.value)}</text>
+          <path d={trapezoid[i]} fill="var(--ec-chart-1)" />
+        </g>
+      ))}
+    </svg>
+  );
+}
 
 export default function FunnelPage() {
   return (
@@ -9,6 +89,9 @@ export default function FunnelPage() {
       <Section title="컴포넌트">
         <P>전용 컴포넌트는 아직 없습니다. 아래 규칙에 맞춰 직접 구성합니다.</P>
         <P>차트 전체에 공통인 규칙(색, 범례, 설명 상자, 빈 상태)은 차트 기본 규칙을 따릅니다. 이 페이지는 깔때기 차트에만 해당하는 것을 적습니다.</P>
+        <Figure caption="견적 요청에서 계약까지 단계별 건수. 막대 길이가 건수이고, 단계 사이의 화살표 옆 숫자가 앞 단계 대비 넘어간 비율입니다. 설명용 그림입니다. 전용 컴포넌트는 아직 없습니다.">
+          <FunnelBars data={stages} label="견적 요청 1,284건, 견적 발송 912건, 협의 486건, 계약 208건으로 줄어드는 깔때기 차트" />
+        </Figure>
       </Section>
 
       <Section title="언제 쓰는가">
@@ -41,6 +124,9 @@ export default function FunnelPage() {
             "막대 길이는 0에서 시작하는 눈금을 따릅니다.",
           ]}
         />
+        <Figure caption="같은 데이터를 두 가지로 그린 것. 왼쪽은 길이를 한 기준선에서 견줄 수 있습니다. 오른쪽은 넓이와 기울기가 눈에 들어와 값을 견주기 어렵습니다. 설명용 그림입니다. 전용 컴포넌트는 아직 없습니다.">
+          <AlignCompare />
+        </Figure>
       </Section>
 
       <Section title="색">
@@ -52,6 +138,9 @@ export default function FunnelPage() {
             "빠진 양을 빨강으로 칠하지 않습니다. 상태 색은 상태 표시에만 씁니다.",
           ]}
         />
+        <Figure caption="빠진 양을 함께 보여 준 모습. 진한 막대가 남은 수, 그 뒤의 연한 막대가 앞 단계의 수입니다. 연한 부분의 길이가 그 단계에서 빠진 양입니다. 설명용 그림입니다. 전용 컴포넌트는 아직 없습니다.">
+          <FunnelBars data={stages} ghost label="단계마다 앞 단계 길이의 연한 막대를 뒤에 깔아 빠진 양을 보여 주는 깔때기 차트" />
+        </Figure>
       </Section>
 
       <Section title="글자">
@@ -76,6 +165,9 @@ export default function FunnelPage() {
       </Section>
 
       <Section title="예외 상황">
+        <Figure caption="값이 0인 단계가 있을 때. 막대 없이 0을 적고, 그 뒤 단계의 비율은 줄표로 적습니다. 설명용 그림입니다. 전용 컴포넌트는 아직 없습니다.">
+          <FunnelBars data={withZero} label="협의 단계가 0건이어서 막대가 없고 계약 단계의 비율이 줄표로 적힌 깔때기 차트" />
+        </Figure>
         <Rules
           items={[
             "아주 작은 값도 막대를 2px 이상의 길이로 그립니다.",

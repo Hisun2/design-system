@@ -19,6 +19,9 @@ const tiny = { "전체 문서": 400, "반려 문서": 2, "전체 문서/반려 �
 const inside = { "전체 문서": 300, "승인 문서": 120, "전체 문서/승인 문서": 120 };
 const withZero = { "국내 거래처": 180, "해외 거래처": 0 };
 
+// Chart.Venn은 범례를 오른쪽 끝에 붙입니다. 차트와 범례를 왼쪽에 모으려면 justifyContent="flex-end"를 줍니다.
+const left = { justifyContent: "flex-end" };
+
 export default function VennPage() {
   return (
     <Page meta={meta} lead="여러 집합이 서로 얼마나 겹치는지 원으로 보여 주는 차트입니다. 원 하나가 집합 하나이고, 원이 겹친 부분이 양쪽에 모두 속하는 것입니다.">
@@ -35,10 +38,10 @@ export default function VennPage() {
 
       <Section title="구성">
         <Demo caption="집합 둘">
-          <Chart.Venn data={two} plotWidth={260} plotHeight={220} aria-label="국내 거래처와 해외 거래처의 겹침" />
+          <Chart.Venn {...left} data={two} plotWidth={260} plotHeight={220} aria-label="국내 거래처와 해외 거래처의 겹침" />
         </Demo>
         <Demo caption="집합 셋">
-          <Chart.Venn data={three} plotWidth={280} plotHeight={260} aria-label="계약, 견적, 발주 문서가 있는 거래처의 겹침" />
+          <Chart.Venn {...left} data={three} plotWidth={280} plotHeight={260} aria-label="계약, 견적, 발주 문서가 있는 거래처의 겹침" />
         </Demo>
         <Table
           head={["요소", "규칙"]}
@@ -113,19 +116,19 @@ export default function VennPage() {
       <Section title="예외 상황">
         <Sub title="값이 전체의 1%보다 작을 때">
           <Demo>
-            <Chart.Venn data={tiny} plotWidth={220} plotHeight={200} aria-label="아주 작은 집합이 있는 벤 다이어그램" />
+            <Chart.Venn {...left} data={tiny} plotWidth={220} plotHeight={200} aria-label="아주 작은 집합이 있는 벤 다이어그램" />
           </Demo>
           <P>원이 사라지지 않게 가장 작은 크기(지름 12px)로 그립니다. 정확한 값은 범례가 전합니다.</P>
         </Sub>
         <Sub title="한 집합이 다른 집합에 완전히 들어갈 때">
           <Demo>
-            <Chart.Venn data={inside} plotWidth={220} plotHeight={200} aria-label="한 집합이 다른 집합에 완전히 포함된 벤 다이어그램" />
+            <Chart.Venn {...left} data={inside} plotWidth={220} plotHeight={200} aria-label="한 집합이 다른 집합에 완전히 포함된 벤 다이어그램" />
           </Demo>
-          <P>작은 원을 큰 원 안의 왼쪽에 붙여 그립니다.</P>
+          <P>작은 원을 큰 원 안쪽 가장자리에 붙여 그립니다.</P>
         </Sub>
         <Sub title="값이 0일 때">
           <Demo>
-            <Chart.Venn data={withZero} plotWidth={220} plotHeight={200} aria-label="값이 0인 집합이 있는 벤 다이어그램" />
+            <Chart.Venn {...left} data={withZero} plotWidth={220} plotHeight={200} aria-label="값이 0인 집합이 있는 벤 다이어그램" />
           </Demo>
           <Rules
             items={[

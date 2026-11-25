@@ -21,37 +21,32 @@ const quarters = [
 ];
 const single = monthly.map(({ 월, 접수 }) => ({ 월, 접수 }));
 const month = (v) => `${v}월`;
+// 꺾은선 차트 공통: 눈금은 값이 있는 달에만 찍고, 세로축 숫자가 잘리지 않게 왼쪽 여백을 줍니다.
+const line = { axisXValueFormatter: month, tooltipTitleFormatter: month, xTicksCount: 5, yTicksCount: 5, marginY: 40 };
 
 const items = [
   { id: "접수", label: "접수", checked: true, color: "var(--ec-chart-1)" },
   { id: "승인", label: "승인", checked: true, color: "var(--ec-chart-2)" },
   { id: "반려", label: "반려", checked: false, color: "var(--ec-chart-3)" },
 ];
-const noop = () => {};
 
-function TrendDemo() {
-  const [visible, setVisible] = React.useState(true);
-  return (
-    <Chart.Bar
-      data={quarters}
-      groupKey="분기"
-      trend={
-        visible
-          ? {
-              추세: [
-                { x: "1분기", y: 100 },
-                { x: "4분기", y: 150 },
-              ],
-            }
-          : undefined
-      }
-      legendProps={{ withTrend: true, trendLabel: "추세", trendIsVisible: visible, onTrendIsVisibleChange: setVisible }}
-      plotWidth={480}
-      plotHeight={200}
-      aria-label="추세선이 있는 분기별 문서 건수"
-    />
-  );
+/** 눌러서 켜고 끌 수 있는 범례. 항목의 checked를 상태로 들고 있다가 누르면 바꿉니다. */
+function ToggleLegend({ items: initial, table, ...props }) {
+  const [items, setItems] = React.useState(initial);
+  const change = (id, checked) => setItems((list) => list.map((item) => (item.id === id ? { ...item, checked } : item)));
+  const Legend = table ? ChartLegendTable : ChartLegend;
+  return <Legend items={items} onChangeVisibleItem={change} {...props} />;
 }
+
+// 추세선의 점은 계열 이름을 키로 묶습니다. 키가 계열 이름과 다르면 선이 그려지지 않습니다.
+const trend = {
+  계약서: [
+    { x: "1분기", y: 123 },
+    { x: "2분기", y: 146 },
+    { x: "3분기", y: 169 },
+    { x: "4분기", y: 192 },
+  ],
+};
 
 export default function ChartLegendPage() {
   return (
@@ -65,13 +60,13 @@ export default function ChartLegendPage() {
           ]}
         />
         <Demo caption="계열이 하나 — 범례 없음" column>
-          <Chart.Line data={single} groupKey="월" plotWidth={480} plotHeight={160} axisXValueFormatter={month} tooltipTitleFormatter={month} aria-label="월별 접수 건수" />
+          <Chart.Line data={single} groupKey="월" plotWidth={480} plotHeight={160} {...line} aria-label="월별 접수 건수" />
         </Demo>
       </Section>
 
       <Section title="구성">
         <Demo>
-          <ChartLegend items={items} aria-label="문서 처리 상태" onChangeVisibleItem={noop} />
+          <ToggleLegend items={items} aria-label="문서 처리 상태" />
         </Demo>
         <Table
           head={["요소", "하는 일", "필수"]}
@@ -96,7 +91,7 @@ export default function ChartLegendPage() {
 
       <Section title="도형의 종류">
         <Demo caption="체크 상자 (shape=&quot;Checkbox&quot;, 기본값) — 눌러서 켜고 끌 수 있음">
-          <ChartLegend items={items} shape="Checkbox" aria-label="켜고 끌 수 있는 범례" onChangeVisibleItem={noop} />
+          <ToggleLegend items={items} shape="Checkbox" aria-label="켜고 끌 수 있는 범례" />
         </Demo>
         <Demo caption="동그라미 (shape=&quot;Circle&quot;) — 보여 주기만 함">
           <ChartLegend items={items.slice(0, 2)} shape="Circle" aria-label="보여 주기만 하는 범례" />
@@ -116,35 +111,34 @@ export default function ChartLegendPage() {
 
       <Section title="크기">
         <Demo caption="M (기본)">
-          <ChartLegend items={items.slice(0, 2)} size="m" aria-label="M 크기 범례" onChangeVisibleItem={noop} />
+          <ToggleLegend items={items.slice(0, 2)} size="m" aria-label="M 크기 범례" />
         </Demo>
         <Demo caption="L">
-          <ChartLegend items={items.slice(0, 2)} size="l" aria-label="L 크기 범례" onChangeVisibleItem={noop} />
+          <ToggleLegend items={items.slice(0, 2)} size="l" aria-label="L 크기 범례" />
         </Demo>
         <P>M이 기본입니다. L은 차트가 화면의 중심이고 주변 글자가 16px일 때만 씁니다. 한 화면에서는 한 가지 크기만 씁니다.</P>
       </Section>
 
       <Section title="덧붙이는 요소">
         <Demo caption="아이콘, 덧붙이는 글, 개수">
-          <ChartLegend
+          <ToggleLegend
             items={[
               { id: "접수", label: "접수", checked: true, color: "var(--ec-chart-1)", icon: <NoteM /> },
               { id: "승인", label: "승인", checked: true, color: "var(--ec-chart-2)", additionalInfo: { label: "최근 6개월" } },
               { id: "반려", label: "반려", checked: true, color: "var(--ec-chart-3)", additionalInfo: { count: 290 } },
             ]}
             aria-label="덧붙이는 요소가 있는 범례"
-            onChangeVisibleItem={noop}
           />
         </Demo>
         <Demo caption="값과 증감을 함께 보여 주는 표 모양 범례 (ChartLegendTable)">
-          <ChartLegendTable
+          <ToggleLegend
+            table
             items={[
               { id: "접수", label: "접수", checked: true, color: "var(--ec-chart-1)", columns: ["2,820건", "+12%"] },
               { id: "승인", label: "승인", checked: true, color: "var(--ec-chart-2)", columns: ["2,330건", "+9%"] },
               { id: "반려", label: "반려", checked: true, color: "var(--ec-chart-3)", columns: ["290건", "-4%"] },
             ]}
             aria-label="값이 있는 범례"
-            onChangeVisibleItem={noop}
           />
         </Demo>
         <Table
@@ -167,10 +161,10 @@ export default function ChartLegendPage() {
 
       <Section title="자리">
         <Demo caption="위 왼쪽 (기본)" column>
-          <Chart.Line data={monthly} groupKey="월" plotWidth={480} plotHeight={180} axisXValueFormatter={month} tooltipTitleFormatter={month} aria-label="범례가 위에 있는 차트" />
+          <Chart.Line data={monthly} groupKey="월" plotWidth={480} plotHeight={180} {...line} aria-label="범례가 위에 있는 차트" />
         </Demo>
         <Demo caption="아래 왼쪽 (direction=&quot;column-reverse&quot;)" column>
-          <Chart.Line data={monthly} groupKey="월" direction="column-reverse" plotWidth={480} plotHeight={180} axisXValueFormatter={month} tooltipTitleFormatter={month} aria-label="범례가 아래에 있는 차트" />
+          <Chart.Line data={monthly} groupKey="월" direction="column-reverse" plotWidth={480} plotHeight={180} {...line} aria-label="범례가 아래에 있는 차트" />
         </Demo>
         <Demo caption="오른쪽 (direction=&quot;row-reverse&quot;, 범례는 세로로)">
           <Chart.Line
@@ -178,10 +172,10 @@ export default function ChartLegendPage() {
             groupKey="월"
             direction="row-reverse"
             legendProps={{ direction: "column" }}
+            w={520}
             plotWidth={400}
             plotHeight={180}
-            axisXValueFormatter={month}
-            tooltipTitleFormatter={month}
+            {...line}
             aria-label="범례가 오른쪽에 있는 차트"
           />
         </Demo>
@@ -203,12 +197,13 @@ export default function ChartLegendPage() {
       </Section>
 
       <Section title="추세와 합계">
-        <Demo caption="추세 항목은 구분선으로 나눠 맨 끝에 둡니다 (withTrend)" column>
-          <TrendDemo />
+        <Demo caption="추세 항목은 구분선으로 나눠 맨 끝에 둡니다 (withTrend) — 누르면 계약서의 추세선이 나타나고, 다시 누르면 사라집니다" column>
+          <Chart.Bar data={quarters} groupKey="분기" yTicksCount={5} trend={trend} legendProps={{ withTrend: true, trendLabel: "추세" }} plotWidth={480} plotHeight={200} aria-label="추세선이 있는 분기별 문서 건수" />
         </Demo>
         <Rules
           items={[
             <>추세선이나 평균선을 켜고 끄는 항목은 <Code>withTrend</Code>로 넣습니다. 계열 항목과 구분선으로 나뉘어 맨 끝에 놓입니다.</>,
+            <>간편 막대 차트는 <Code>trend</Code>에 계열 이름마다 추세선의 점을 주면 이 항목이 생깁니다. 처음에는 꺼져 있습니다.</>,
             <>이름은 <Code>trendLabel</Code>로 "추세", "평균"처럼 우리말로 줍니다.</>,
             "합계선도 같은 방식으로 보여 줍니다. 선 위의 점은 넣어도 되고 빼도 됩니다.",
             "추세와 합계는 데이터 계열이 아니므로 회색 선으로 그립니다.",
@@ -235,8 +230,7 @@ export default function ChartLegendPage() {
             legendProps={{ legendMap: { 반려: { defaultChecked: false } } }}
             plotWidth={480}
             plotHeight={180}
-            axisXValueFormatter={month}
-            tooltipTitleFormatter={month}
+            {...line}
             aria-label="일부 계열을 꺼 둔 차트"
           />
         </Demo>
@@ -255,7 +249,7 @@ export default function ChartLegendPage() {
       <Section title="쓰는 법">
         <DoDont
           good={{
-            demo: <ChartLegend items={items.slice(0, 2)} aria-label="이름이 있는 범례" onChangeVisibleItem={noop} />,
+            demo: <ToggleLegend items={items.slice(0, 2)} aria-label="이름이 있는 범례" />,
             text: "색과 이름을 함께 보여 줍니다.",
           }}
           bad={{ text: "\"파란 선은 접수입니다\"처럼 색 이름으로 설명하지 않습니다. 색을 구분하지 못하는 사용자는 읽을 수 없습니다." }}

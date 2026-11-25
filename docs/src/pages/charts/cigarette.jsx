@@ -10,6 +10,8 @@ const many = { 계약서: 320, 견적서: 210, 보고서: 150, 영수증: 110, �
 const withZero = { 계약서: 504, 견적서: 324, 보고서: 0 };
 const withSmall = { 계약서: 980, 견적서: 410, 보고서: 6 };
 const withMissing = { 계약서: 504, 견적서: 324, 보고서: interpolateValue };
+// 컴포넌트의 기본 색은 파랑 다섯 단계뿐입니다. 우리 규칙대로 차트 색을 순서대로 주고 "기타"는 회색으로 둡니다.
+const colors = (data) => Object.fromEntries(Object.keys(data).map((name, i) => [name, name === "기타" ? "var(--ec-chart-other)" : `var(--ec-chart-${i + 1})`]));
 const count = (v) => `${Number(v).toLocaleString("ko-KR")}건`;
 
 function Total({ value, label }) {
@@ -31,7 +33,7 @@ export default function CigaretteChartPage() {
       <Section title="언제 쓰는가">
         <Demo caption="문서 유형별 비중">
           <Box w={420}>
-            <Chart.Cigarette data={types} showLegend tooltipValueFormatter={count} plotWidth={420} aria-label="문서 유형별 비중" />
+            <Chart.Cigarette data={types} colorMap={colors(types)} showLegend tooltipValueFormatter={count} plotWidth={420} aria-label="문서 유형별 비중" />
           </Box>
         </Demo>
         <Rules
@@ -56,7 +58,8 @@ export default function CigaretteChartPage() {
         />
         <Rules
           items={[
-            <>색은 <Code>--ec-chart-1</Code>부터 순서대로 칠합니다. "기타"는 맨 끝에 회색으로 둡니다.</>,
+            <>색은 <Code>--ec-chart-1</Code>부터 순서대로 칠합니다. "기타"는 맨 끝에 회색(<Code>--ec-chart-other</Code>)으로 둡니다.</>,
+            <>컴포넌트의 기본 색은 파랑 다섯 단계라서 그대로 쓰지 않습니다. <Code>colorMap</Code>에 항목 이름마다 색을 적어 줍니다.</>,
             "값이 큰 것부터 놓습니다. 범례의 순서도 같게 합니다.",
             "축도 보조선도 그리지 않습니다.",
           ]}
@@ -66,11 +69,11 @@ export default function CigaretteChartPage() {
       <Section title="놓는 방향">
         <Demo caption="가로 (기본) — 값을 왼쪽에서 오른쪽으로 놓습니다">
           <Box w={360}>
-            <Chart.Cigarette data={types} showLegend plotWidth={360} aria-label="가로로 놓은 한 줄 비율 차트" />
+            <Chart.Cigarette data={types} colorMap={colors(types)} showLegend plotWidth={360} aria-label="가로로 놓은 한 줄 비율 차트" />
           </Box>
         </Demo>
         <Demo caption="세로 (invertAxis={false}) — 값을 아래에서 위로 쌓습니다">
-          <Chart.Cigarette data={types} invertAxis={false} showLegend plotHeight={160} aria-label="세로로 놓은 한 줄 비율 차트" />
+          <Chart.Cigarette data={types} colorMap={colors(types)} invertAxis={false} showLegend plotHeight={160} aria-label="세로로 놓은 한 줄 비율 차트" />
         </Demo>
         <Rules
           items={[
@@ -96,11 +99,11 @@ export default function CigaretteChartPage() {
       <Section title="합계 표시">
         <Demo caption="합계나 가장 큰 값을 차트 곁에 큰 숫자로 (header)">
           <Box w={360}>
-            <Chart.Cigarette data={types} showLegend header={<Total value="1,200건" label="전체 문서" />} plotWidth={360} aria-label="합계를 함께 보여 주는 한 줄 비율 차트" />
+            <Chart.Cigarette data={types} colorMap={colors(types)} showLegend header={<Total value="1,200건" label="전체 문서" />} plotWidth={360} aria-label="합계를 함께 보여 주는 한 줄 비율 차트" />
           </Box>
         </Demo>
         <Demo caption="세로로 놓으면 합계가 범례 위에 놓이고 구분선이 들어갑니다">
-          <Chart.Cigarette data={types} invertAxis={false} showLegend header={<Total value="1,200건" label="전체 문서" />} plotHeight={180} aria-label="합계를 함께 보여 주는 세로 한 줄 비율 차트" />
+          <Chart.Cigarette data={types} colorMap={colors(types)} invertAxis={false} showLegend header={<Total value="1,200건" label="전체 문서" />} plotHeight={180} aria-label="합계를 함께 보여 주는 세로 한 줄 비율 차트" />
         </Demo>
         <Table
           head={["요소", "모양"]}
@@ -128,7 +131,7 @@ export default function CigaretteChartPage() {
         />
         <Demo caption="설명 상자에 제목과 비중을 함께">
           <Box w={360}>
-            <Chart.Cigarette data={types} tooltipTitle="문서 유형" showPercentValueInTooltip showTotalInTooltip tooltipValueFormatter={count} plotWidth={360} aria-label="설명 상자에 비중이 나오는 한 줄 비율 차트" />
+            <Chart.Cigarette data={types} colorMap={colors(types)} tooltipTitle="문서 유형" showPercentValueInTooltip showTotalInTooltip tooltipValueFormatter={count} plotWidth={360} aria-label="설명 상자에 비중이 나오는 한 줄 비율 차트" />
           </Box>
         </Demo>
       </Section>
@@ -137,7 +140,7 @@ export default function CigaretteChartPage() {
         <Sub title="값이 0인 항목">
           <Demo>
             <Box w={360}>
-              <Chart.Cigarette data={withZero} showLegend plotWidth={360} aria-label="값이 0인 항목이 있는 한 줄 비율 차트" />
+              <Chart.Cigarette data={withZero} colorMap={colors(withZero)} showLegend plotWidth={360} aria-label="값이 0인 항목이 있는 한 줄 비율 차트" />
             </Box>
           </Demo>
           <P>
@@ -147,7 +150,7 @@ export default function CigaretteChartPage() {
         <Sub title="1% 이하인 항목">
           <Demo>
             <Box w={360}>
-              <Chart.Cigarette data={withSmall} showLegend plotWidth={360} aria-label="아주 작은 항목이 있는 한 줄 비율 차트" />
+              <Chart.Cigarette data={withSmall} colorMap={colors(withSmall)} showLegend plotWidth={360} aria-label="아주 작은 항목이 있는 한 줄 비율 차트" />
             </Box>
           </Demo>
           <P>값이 1% 이하여도 조각이 사라지지 않게 최소 굵기로 그립니다. 범례와 설명 상자에는 실제 값을 적습니다.</P>
@@ -155,7 +158,7 @@ export default function CigaretteChartPage() {
         <Sub title="값이 없는 항목">
           <Demo>
             <Box w={360}>
-              <Chart.Cigarette data={withMissing} showLegend plotWidth={360} aria-label="값이 없는 항목이 있는 한 줄 비율 차트" />
+              <Chart.Cigarette data={withMissing} colorMap={colors(withMissing)} showLegend plotWidth={360} aria-label="값이 없는 항목이 있는 한 줄 비율 차트" />
             </Box>
           </Demo>
           <Rules
@@ -171,7 +174,7 @@ export default function CigaretteChartPage() {
           <Demo>
             <Box w={360}>
               <Skeleton h={28}>
-                <Skeleton.Text amount={1} />
+                <Skeleton.Text amount={1} height={28} />
               </Skeleton>
             </Box>
           </Demo>
@@ -184,7 +187,7 @@ export default function CigaretteChartPage() {
           good={{
             demo: (
               <Box w={260}>
-                <Chart.Cigarette data={types} plotWidth={260} aria-label="항목이 넷인 한 줄 비율 차트" />
+                <Chart.Cigarette data={types} colorMap={colors(types)} plotWidth={260} aria-label="항목이 넷인 한 줄 비율 차트" />
               </Box>
             ),
             text: "항목은 5개까지만 넣습니다. 작은 항목은 \"기타\"로 묶습니다.",
@@ -192,7 +195,7 @@ export default function CigaretteChartPage() {
           bad={{
             demo: (
               <Box w={260}>
-                <Chart.Cigarette data={many} plotWidth={260} aria-label="항목이 아홉인 한 줄 비율 차트" />
+                <Chart.Cigarette data={many} colorMap={colors(many)} plotWidth={260} aria-label="항목이 아홉인 한 줄 비율 차트" />
               </Box>
             ),
             text: "항목을 많이 넣지 않습니다. 조각이 가늘어져 구분되지 않습니다.",

@@ -1,7 +1,85 @@
 import React from "react";
-import { Page, Section, Sub, P, Rules, Table, DoDont, Code, Swatch } from "../../kit.jsx";
+import { Page, Section, Sub, P, Rules, Table, DoDont, Code, Swatch, Figure } from "../../kit.jsx";
 
 export const meta = { title: "사분면 차트", order: 34 };
+
+// 거래처 열여섯 곳. [이름, 거래 금액(백만 원), 거래 횟수(회), 유형]
+const clients = [
+  ["거래처 A", 420, 48, "제조"], ["거래처 B", 360, 52, "유통"], ["거래처 C", 310, 38, "제조"], ["거래처 D", 455, 30, "제조"],
+  ["거래처 E", 90, 44, "유통"], ["거래처 F", 130, 51, "유통"], ["거래처 G", 60, 36, "유통"], ["거래처 H", 380, 12, "제조"],
+  ["거래처 I", 300, 8, "제조"], ["거래처 J", 70, 12, "유통"], ["거래처 K", 110, 16, "제조"], ["거래처 L", 40, 9, "유통"],
+  ["거래처 M", 150, 22, "제조"], ["거래처 N", 200, 18, "유통"], ["거래처 O", 180, 30, "제조"], ["거래처 P", 95, 24, "유통"],
+];
+const mean = (i) => clients.reduce((sum, c) => sum + c[i], 0) / clients.length;
+const avgAmount = mean(1);
+const avgCount = mean(2);
+const named = ["거래처 A", "거래처 F", "거래처 H", "거래처 L"];
+const typeFill = { 제조: "var(--ec-chart-1)", 유통: "var(--ec-chart-2)" };
+
+/** 기준선(전체 평균) 두 개로 나눈 사분면 차트. byType이면 유형별로 색을 나누고, highlight면 오른쪽 위 구역에 옅은 바탕을 깝니다. */
+function Quadrant({ byType, highlight, label }) {
+  const left = 56;
+  const top = byType ? 32 : 8;
+  const w = 440;
+  const h = 280;
+  const x = (v) => left + (v / 500) * w;
+  const y = (v) => top + h - (v / 60) * h;
+  const rx = x(avgAmount);
+  const ry = y(avgCount);
+  const count = (right, up) => clients.filter((c) => c[1] >= avgAmount === right && c[2] >= avgCount === up).length;
+  const zone = (name, right, up) => (
+    <text
+      x={right ? left + w - 8 : left + 8}
+      y={up ? top + 14 : top + h - 14}
+      textAnchor={right ? "end" : "start"}
+      dominantBaseline="central"
+      fontSize={12}
+      fontWeight={500}
+      fill="var(--ec-text-secondary)"
+    >
+      {name} · {count(right, up)}곳
+    </text>
+  );
+  return (
+    <svg viewBox={`0 0 560 ${top + h + 68}`} width={560} role="img" aria-label={label}>
+      {byType ? (
+        <g>
+          <circle cx={left + 6} cy={10} r={5.5} fill={typeFill.제조} fillOpacity={0.5} />
+          <text x={left + 18} y={10} dominantBaseline="central" fontSize={12} fill="var(--ec-text-secondary)">제조</text>
+          <circle cx={left + 62} cy={10} r={5.5} fill={typeFill.유통} fillOpacity={0.5} />
+          <text x={left + 74} y={10} dominantBaseline="central" fontSize={12} fill="var(--ec-text-secondary)">유통</text>
+        </g>
+      ) : null}
+      {highlight ? <rect x={rx} y={top} width={left + w - rx} height={ry - top} fill="var(--ec-bg-page)" /> : null}
+      <rect x={left} y={top} width={w} height={h} fill="none" stroke="var(--ec-border)" />
+      <line x1={rx} x2={rx} y1={top} y2={top + h} stroke="var(--ec-border-control)" />
+      <line x1={left} x2={left + w} y1={ry} y2={ry} stroke="var(--ec-border-control)" />
+      {[0, 100, 200, 300, 400, 500].map((t) => (
+        <text key={t} x={x(t)} y={top + h + 14} textAnchor="middle" dominantBaseline="central" fontSize={12} fill="var(--ec-text-secondary)">{t}</text>
+      ))}
+      {[0, 20, 40, 60].map((t) => (
+        <text key={t} x={left - 8} y={y(t)} textAnchor="end" dominantBaseline="central" fontSize={12} fill="var(--ec-text-secondary)">{t}</text>
+      ))}
+      <text x={left + w / 2} y={top + h + 36} textAnchor="middle" dominantBaseline="central" fontSize={12} fill="var(--ec-text-secondary)">거래 금액(백만 원)</text>
+      <text transform={`translate(12 ${top + h / 2}) rotate(-90)`} textAnchor="middle" dominantBaseline="central" fontSize={12} fill="var(--ec-text-secondary)">거래 횟수(회)</text>
+      {zone("자주 거래", false, true)}
+      {zone("핵심 거래처", true, true)}
+      {zone("관리 필요", false, false)}
+      {zone("큰 거래", true, false)}
+      {clients.map(([name, amount, times, type]) => (
+        <g key={name}>
+          <circle cx={x(amount)} cy={y(times)} r={5.5} fill={byType ? typeFill[type] : "var(--ec-chart-1)"} fillOpacity={0.5} />
+          {named.includes(name) ? (
+            <text x={x(amount) + 10} y={y(times)} dominantBaseline="central" fontSize={12} fill="var(--ec-text-primary)">{name}</text>
+          ) : null}
+        </g>
+      ))}
+      <text x={left} y={top + h + 58} dominantBaseline="central" fontSize={12} fill="var(--ec-text-secondary)">
+        기준선: 전체 평균(거래 금액 {Math.round(avgAmount)}백만 원, 거래 횟수 {avgCount.toFixed(1)}회)
+      </text>
+    </svg>
+  );
+}
 
 export default function QuadrantPage() {
   return (
@@ -9,6 +87,9 @@ export default function QuadrantPage() {
       <Section title="컴포넌트">
         <P>전용 컴포넌트는 아직 없습니다. 아래 규칙에 맞춰 직접 구성합니다.</P>
         <P>점의 모양과 동작은 산점도 규칙을, 그 밖의 공통 규칙(색, 범례, 설명 상자, 빈 상태)은 차트 기본 규칙을 따릅니다. 이 페이지는 사분면 차트에만 해당하는 것을 적습니다.</P>
+        <Figure caption="거래처 열여섯 곳을 거래 금액과 거래 횟수로 찍고, 전체 평균에 기준선을 그어 네 구역으로 나눈 모습. 구역 이름 옆에 그 구역의 거래처 수를 적었습니다. 기준선은 평균의 위치에 있어 한가운데가 아닙니다. 설명용 그림입니다. 전용 컴포넌트는 아직 없습니다.">
+          <Quadrant label="거래처 열여섯 곳을 거래 금액과 거래 횟수로 찍은 사분면 차트. 전체 평균 기준선으로 핵심 거래처, 자주 거래, 큰 거래, 관리 필요의 네 구역으로 나뉩니다" />
+        </Figure>
       </Section>
 
       <Section title="언제 쓰는가">
@@ -55,6 +136,9 @@ export default function QuadrantPage() {
             <>기준선은 <Code>--ec-border-control</Code>, 구역 이름과 축 글자는 <Code>--ec-text-secondary</Code>입니다.</>,
           ]}
         />
+        <Figure caption="거래처 유형별로 색을 나누고 범례를 둔 모습. 강조할 오른쪽 위 구역 하나에만 옅은 바탕을 깔았습니다. 설명용 그림입니다. 전용 컴포넌트는 아직 없습니다.">
+          <Quadrant byType highlight label="거래처 유형(제조, 유통)별로 점의 색을 나누고 핵심 거래처 구역에 옅은 바탕을 깐 사분면 차트" />
+        </Figure>
       </Section>
 
       <Section title="글자">

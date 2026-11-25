@@ -1,6 +1,7 @@
 import React from "react";
-import { Box, Skeleton, BubbleChartSkeleton } from "@ec21rnc/ui";
+import { BubbleChartSkeleton } from "@ec21rnc/ui";
 import { Chart } from "@ec21rnc/ui/chart";
+import { scaleLinear } from "@ec21rnc/ui/chart";
 import { Page, Section, Sub, P, Rules, Table, Demo, DoDont, Code } from "../../kit.jsx";
 
 export const meta = { title: "버블 차트", order: 17 };
@@ -38,7 +39,18 @@ const withZero = [
   { x: 36, y: 5.1, value: 410 },
   { x: 21, y: 2.4, value: 150 },
 ];
-const crowded = Array.from({ length: 28 }, (_, i) => ({ x: 10 + ((i * 7) % 40), y: 2 + ((i * 3) % 6) + (i % 2) * 0.4, value: 60 + ((i * 53) % 500) }));
+const crowded = Array.from({ length: 28 }, (_, i) => ({ x: 10 + ((i * 7) % 40), y: 2 + ((i * 3) % 6) + (i % 2) * 0.4, value: 60 + ((i * 53) % 500), color: `var(--ec-chart-${(i % 6) + 1})` }));
+
+// 축의 범위를 직접 정할 때 씁니다. 가장 큰 원의 반지름만큼 여유를 두어 원이 가장자리에서 잘리지 않게 합니다.
+// x, y는 각각 [아래 끝, 위 끝, 눈금 수]입니다.
+const axes = (w, h, [x0, x1, xTicks], [y0, y1, yTicks]) => ({
+  plotWidth: w,
+  plotHeight: h,
+  xScale: scaleLinear().domain([x0, x1]).range([48, w - 8]),
+  yScale: scaleLinear().domain([y0, y1]).range([h - 30, 8]),
+  xTicksCount: xTicks,
+  yTicksCount: yTicks,
+});
 
 const days = (v) => `${v}일`;
 
@@ -54,7 +66,7 @@ export default function BubbleChartPage() {
     <Page meta={meta} lead="가로 위치, 세로 위치, 원의 크기로 세 가지 값을 한꺼번에 보여 주는 차트입니다. 색까지 쓰면 네 가지를 담을 수 있습니다. 값들 사이의 관계와 무리를 찾을 때 씁니다.">
       <Section title="언제 쓰는가">
         <Demo caption="부서별 담당 문서 수(가로, 건) · 평균 처리 기간(세로, 일) · 금액(원의 크기, 백만 원)" column>
-          <Chart.Bubble data={teams} legendProps={{ legendMap: teamLegend }} axisYValueFormatter={days} plotWidth={560} plotHeight={300} aria-label="부서별 담당 문서 수와 처리 기간, 금액" />
+          <Chart.Bubble data={teams} marginY={48} legendProps={{ legendMap: teamLegend }} axisYValueFormatter={days} plotWidth={560} plotHeight={300} aria-label="부서별 담당 문서 수와 처리 기간, 금액" />
         </Demo>
         <Rules
           items={[
@@ -88,10 +100,10 @@ export default function BubbleChartPage() {
 
       <Section title="색">
         <Demo caption="묶음이 하나 — 한 가지 색" column>
-          <Chart.Bubble data={oneColor} showLegend={false} axisYValueFormatter={days} plotWidth={480} plotHeight={240} aria-label="한 가지 색으로 그린 버블 차트" />
+          <Chart.Bubble data={oneColor} marginY={48} showLegend={false} axisYValueFormatter={days} plotWidth={480} plotHeight={240} aria-label="한 가지 색으로 그린 버블 차트" />
         </Demo>
         <Demo caption="묶음이 여럿 — 묶음마다 색 (파랑: 본사, 청록: 지사)" column>
-          <Chart.Bubble data={groups} showLegend={false} axisYValueFormatter={days} plotWidth={480} plotHeight={240} aria-label="묶음마다 색을 달리한 버블 차트" />
+          <Chart.Bubble data={groups} marginY={48} showLegend={false} axisYValueFormatter={days} plotWidth={480} plotHeight={240} aria-label="묶음마다 색을 달리한 버블 차트" />
         </Demo>
         <Table
           head={["요소", "모양"]}
@@ -114,7 +126,7 @@ export default function BubbleChartPage() {
       <Section title="이름표">
         <Demo caption="원 옆의 이름표 (label)" column>
           <BrowserOnly>
-            <Chart.Bubble data={labeled} showLegend={false} axisYValueFormatter={days} plotWidth={480} plotHeight={260} aria-label="이름표를 붙인 버블 차트" />
+            <Chart.Bubble data={labeled} marginY={48} showLegend={false} axisYValueFormatter={days} plotWidth={480} plotHeight={260} aria-label="이름표를 붙인 버블 차트" />
           </BrowserOnly>
         </Demo>
         <Rules
@@ -155,29 +167,25 @@ export default function BubbleChartPage() {
       <Section title="예외 상황">
         <Sub title="값의 차이가 아주 클 때">
           <Demo column>
-            <Chart.Bubble data={outlier} showLegend={false} axisYValueFormatter={days} plotWidth={480} plotHeight={240} aria-label="크기 차이가 큰 버블 차트" />
+            <Chart.Bubble data={outlier} marginY={48} showLegend={false} axisYValueFormatter={days} plotWidth={480} plotHeight={240} aria-label="크기 차이가 큰 버블 차트" />
           </Demo>
           <P>큰 원에 가려 작은 값이 사라지지 않게, 원은 아무리 작아도 지름 11px로 그립니다.</P>
         </Sub>
         <Sub title="값이 0일 때">
           <Demo column>
-            <Chart.Bubble data={withZero} showLegend={false} axisYValueFormatter={days} plotWidth={480} plotHeight={220} aria-label="값이 0인 원이 있는 버블 차트" />
+            <Chart.Bubble data={withZero} showLegend={false} axisYValueFormatter={days} {...axes(480, 220, [-5, 55, 6], [-1, 9, 5])} aria-label="값이 0인 원이 있는 버블 차트" />
           </Demo>
-          <P>0은 데이터입니다. 두 축의 값이 모두 0인 원은 축이 만나는 자리에 그립니다. 범례에도 0으로 적습니다.</P>
+          <P>0은 데이터입니다. 두 축의 값이 모두 0인 원은 두 축의 0이 만나는 자리에 그립니다. 범례에도 0으로 적습니다.</P>
         </Sub>
         <Sub title="값이 없을 때">
           <P>값이 없는 대상은 차트에 그리지 않습니다. 범례에는 항목을 남기고 "값 없음"이라고 적어 빠진 것이 있음을 알립니다.</P>
         </Sub>
         <Sub title="원이 축 가까이에 있을 때">
-          <P>원이 축이나 차트 가장자리에 걸리면 잘리지 않도록 축의 범위가 자동으로 넓어집니다. 축의 범위를 직접 정할 때도 가장 큰 원의 반지름만큼 여유를 둡니다.</P>
+          <P>축의 범위는 원이 들어가도록 자동으로 넓어집니다. 그래도 큰 원이 가장자리에서 잘리면 <Code>xScale</Code>과 <Code>yScale</Code>로 범위를 직접 정하고, 가장 큰 원의 반지름만큼 여유를 둡니다.</P>
         </Sub>
         <Sub title="처음 불러올 때">
           <Demo>
-            <Box w={320}>
-              <Skeleton h={180}>
-                <BubbleChartSkeleton />
-              </Skeleton>
-            </Box>
+            <BubbleChartSkeleton w={320} h={180} />
           </Demo>
           <P>
             처음 불러오는 동안에는 <Code>BubbleChartSkeleton</Code>을 보여 줍니다. 차트 제목이 있으면 제목은 먼저 보여 줍니다. 그 밖의 빈 상태는 차트 기본 구조의 빈 상태 규칙을 따릅니다.
@@ -188,11 +196,11 @@ export default function BubbleChartPage() {
       <Section title="쓰는 법">
         <DoDont
           good={{
-            demo: <Chart.Bubble data={oneColor} showLegend={false} plotWidth={260} plotHeight={200} aria-label="원이 다섯인 버블 차트" />,
+            demo: <Chart.Bubble data={oneColor} showLegend={false} {...axes(400, 220, [0, 70, 7], [-1, 10, 5])} aria-label="원이 다섯인 버블 차트" />,
             text: "원의 수와 묶음의 수를 줄여 무리가 보이게 합니다. 차트는 넉넉한 크기로 그립니다.",
           }}
           bad={{
-            demo: <Chart.Bubble data={crowded} showLegend={false} plotWidth={260} plotHeight={200} aria-label="원이 지나치게 많은 버블 차트" />,
+            demo: <Chart.Bubble data={crowded} showLegend={false} {...axes(260, 200, [-10, 70, 4], [-2, 11, 5])} aria-label="원이 지나치게 많은 버블 차트" />,
             text: "작은 자리에 많은 원을 색색으로 넣지 않습니다. 겹쳐서 아무것도 읽을 수 없습니다.",
           }}
         />

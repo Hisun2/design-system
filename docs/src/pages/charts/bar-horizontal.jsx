@@ -1,32 +1,33 @@
 import React from "react";
-import { Box, Flex, Text, Skeleton, BarChartSkeleton } from "@ec21rnc/ui";
+import { Flex, Text, BarChartSkeleton } from "@ec21rnc/ui";
 import { Chart } from "@ec21rnc/ui/chart";
 import { Page, Section, Sub, P, Rules, Table, Demo, DoDont, Code } from "../../kit.jsx";
 
 export const meta = { title: "가로 막대 차트", order: 14 };
 
+// 가로로 그릴 때 Chart.Bar는 데이터의 첫 항목을 맨 아래에 놓습니다. 큰 값이 위로 오도록 작은 값부터 적습니다.
 const teams = [
-  { 부서: "영업", 건수: 480 },
-  { 부서: "구매", 건수: 360 },
-  { 부서: "재무", 건수: 210 },
-  { 부서: "인사", 건수: 140 },
   { 부서: "총무", 건수: 90 },
-];
-const unsorted = [teams[3], teams[0], teams[4], teams[2], teams[1]];
-const share = [
-  { 유형: "계약서", 비중: 42 },
-  { 유형: "견적서", 비중: 27 },
-  { 유형: "보고서", 비중: 19 },
-  { 유형: "기타", 비중: 12 },
-];
-const twoSeries = teams.slice(0, 4).map((row, i) => ({ 부서: row.부서, 접수: row.건수, 승인: row.건수 - 40 - i * 15 }));
-const zeros = teams.slice(0, 3).map((row) => ({ 부서: row.부서, 건수: 0 }));
-const missing = [
-  { 부서: "영업", 건수: 480 },
-  { 부서: "구매", 건수: null },
+  { 부서: "인사", 건수: 140 },
   { 부서: "재무", 건수: 210 },
+  { 부서: "구매", 건수: 360 },
+  { 부서: "영업", 건수: 480 },
 ];
-const few = teams.slice(0, 2);
+const unsorted = [teams[1], teams[4], teams[0], teams[2], teams[3]];
+const share = [
+  { 유형: "기타", 비중: 12 },
+  { 유형: "보고서", 비중: 19 },
+  { 유형: "견적서", 비중: 27 },
+  { 유형: "계약서", 비중: 42 },
+];
+const twoSeries = teams.slice(1).map((row, i) => ({ 부서: row.부서, 접수: row.건수, 승인: row.건수 - 85 + i * 15 }));
+const zeros = teams.slice(2).map((row) => ({ 부서: row.부서, 건수: 0 }));
+const missing = [
+  { 부서: "재무", 건수: 210 },
+  { 부서: "구매", 건수: null },
+  { 부서: "영업", 건수: 480 },
+];
+const few = teams.slice(3);
 const percent = (v) => `${v}%`;
 
 export default function HorizontalBarChartPage() {
@@ -83,7 +84,7 @@ export default function HorizontalBarChartPage() {
 
       <Section title="축과 보조선">
         <Demo caption="보조선 없음 — 합이 100%인 비중을 보여 줄 때" column>
-          <Chart.Bar data={share} groupKey="유형" invertAxis showXAxis={false} tooltipValueFormatter={percent} plotWidth={480} plotHeight={180} aria-label="문서 유형별 비중" />
+          <Chart.Bar data={share} groupKey="유형" invertAxis marginY={56} showXAxis={false} tooltipValueFormatter={percent} plotWidth={480} plotHeight={180} aria-label="문서 유형별 비중" />
         </Demo>
         <Demo caption="보조선 있음 — 합이 정해지지 않은 값을 보여 줄 때" column>
           <Chart.Bar data={teams} groupKey="부서" invertAxis xTicksCount={5} plotWidth={480} plotHeight={200} aria-label="부서별 처리 건수와 보조선" />
@@ -136,7 +137,7 @@ export default function HorizontalBarChartPage() {
       <Section title="예외 상황">
         <Sub title="항목이 더 없을 때">
           <Demo column>
-            <Chart.Bar data={few} groupKey="부서" invertAxis showXAxis={false} plotWidth={480} plotHeight={100} aria-label="항목이 둘뿐인 가로 막대 차트" />
+            <Chart.Bar data={few} groupKey="부서" invertAxis showXAxis={false} marginX={0} plotWidth={480} plotHeight={100} aria-label="항목이 둘뿐인 가로 막대 차트" />
             <Flex mt={8}>
               <Text color="text-secondary">더 이상 결과가 없습니다</Text>
             </Flex>
@@ -165,14 +166,10 @@ export default function HorizontalBarChartPage() {
         </Sub>
         <Sub title="처음 불러올 때">
           <Demo>
-            <Box w={320}>
-              <Skeleton h={160}>
-                <BarChartSkeleton layout="horizontal" />
-              </Skeleton>
-            </Box>
+            <BarChartSkeleton layout="vertical" w={320} h={160} />
           </Demo>
           <P>
-            처음 불러오는 동안에는 <Code>{'<BarChartSkeleton layout="horizontal" />'}</Code>을 보여 줍니다. 차트 제목이 있으면 제목은 먼저 보여 줍니다. 그 밖의 빈 상태는 차트 기본 구조의 빈 상태 규칙을 따릅니다.
+            처음 불러오는 동안에는 <Code>{'<BarChartSkeleton layout="vertical" />'}</Code>을 보여 줍니다. <Code>layout</Code>은 막대가 늘어서는 방향이므로, 가로로 누운 막대는 <Code>vertical</Code>입니다. 차트 제목이 있으면 제목은 먼저 보여 줍니다. 그 밖의 빈 상태는 차트 기본 구조의 빈 상태 규칙을 따릅니다.
           </P>
         </Sub>
       </Section>

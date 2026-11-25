@@ -1,7 +1,117 @@
 import React from "react";
-import { Page, Section, Sub, P, Rules, Table, DoDont, Code, Swatch } from "../../kit.jsx";
+import { Page, Section, Sub, P, Rules, Table, DoDont, Code, Swatch, Figure } from "../../kit.jsx";
 
 export const meta = { title: "히트맵", order: 30 };
+
+const NULL_FILL = "var(--ec-chart-null)";
+const STEP_FILL = ["var(--ec-chart-13)", "var(--ec-chart-1)", "var(--ec-chart-7)", "var(--ec-chart-19)"];
+// 연한 두 단계에는 어두운 글자, 진한 두 단계에는 흰 글자.
+const STEP_TEXT = ["var(--ec-text-primary)", "var(--ec-text-primary)", "var(--ec-text-invert)", "var(--ec-text-invert)"];
+const stepOf = (v, bounds) => bounds.filter((b) => v >= b).length;
+
+/** 범례 한 줄. items는 [색, 글자]의 배열. */
+function Legend({ x, y, title, items, itemWidth }) {
+  return (
+    <g>
+      <text x={x} y={y} dominantBaseline="central" fontSize={12} fill="var(--ec-text-secondary)">{title}</text>
+      {items.map(([fill, text], i) => (
+        <g key={text}>
+          <rect x={x + 88 + i * itemWidth} y={y - 6} width={12} height={12} rx={2} fill={fill} />
+          <text x={x + 106 + i * itemWidth} y={y} dominantBaseline="central" fontSize={12} fill="var(--ec-text-secondary)">{text}</text>
+        </g>
+      ))}
+    </g>
+  );
+}
+
+// 요일 × 시간대별 접수 건수. 평일 낮에 몰리고, 일요일 새벽은 점검 시간이라 값이 없습니다.
+const days = ["월", "화", "수", "목", "금", "토", "일"];
+const dayWeight = [1.15, 1, 1.05, 0.95, 0.8, 0.2, 0.1];
+const hourly = (d, h) => {
+  if (d === 6 && h < 6) return null;
+  const peak = Math.exp(-((h - 10.5) ** 2) / 8) + 0.8 * Math.exp(-((h - 15) ** 2) / 6);
+  const wobble = h >= 8 && h <= 19 ? ((d * 7 + h * 13) % 5) * 6 : 0;
+  return Math.round(dayWeight[d] * (130 * peak + wobble));
+};
+const hourBounds = [20, 50, 100];
+
+function DayHourHeatmap() {
+  const x0 = 28;
+  const cell = 18;
+  const pitch = 20;
+  const gridH = days.length * pitch;
+  return (
+    <svg viewBox={`0 0 560 ${gridH + 60}`} width={560} role="img" aria-label="요일과 시간대별 접수 건수 히트맵. 평일 9시부터 16시 사이가 가장 진하고, 밤과 주말은 연합니다. 일요일 0시부터 5시는 값이 없습니다">
+      {days.map((day, d) => (
+        <g key={day}>
+          <text x={x0 - 8} y={d * pitch + cell / 2} textAnchor="end" dominantBaseline="central" fontSize={12} fill="var(--ec-text-secondary)">{day}</text>
+          {Array.from({ length: 24 }, (_, h) => {
+            const v = hourly(d, h);
+            return <rect key={h} x={x0 + h * pitch} y={d * pitch} width={cell} height={cell} fill={v === null ? NULL_FILL : STEP_FILL[stepOf(v, hourBounds)]} />;
+          })}
+        </g>
+      ))}
+      {[0, 3, 6, 9, 12, 15, 18, 21].map((h) => (
+        <text key={h} x={x0 + h * pitch + cell / 2} y={gridH + 10} textAnchor="middle" dominantBaseline="central" fontSize={12} fill="var(--ec-text-secondary)">{h}시</text>
+      ))}
+      <Legend
+        x={x0}
+        y={gridH + 44}
+        title="접수 건수(건)"
+        itemWidth={84}
+        items={[[STEP_FILL[0], "0~19"], [STEP_FILL[1], "20~49"], [STEP_FILL[2], "50~99"], [STEP_FILL[3], "100 이상"], [NULL_FILL, "값 없음"]]}
+      />
+    </svg>
+  );
+}
+
+// 월 × 부서별 승인 건수. null은 값 없음.
+const months = ["6월", "7월", "8월", "9월", "10월", "11월"];
+const byDept = [
+  ["영업팀", [412, 538, 655, 720, 684, 590]],
+  ["구매팀", [180, 245, 310, 402, 455, 380]],
+  ["물류팀", [96, 140, 0, 215, 330, 610]],
+  ["재무팀", [null, null, 120, 164, 208, 190]],
+];
+const deptBounds = [200, 400, 600];
+
+function MonthDeptHeatmap() {
+  const x0 = 56;
+  const w = 64;
+  const h = 32;
+  const gap = 2;
+  const gridH = byDept.length * (h + gap);
+  return (
+    <svg viewBox={`0 0 560 ${gridH + 60}`} width={560} role="img" aria-label="월과 부서별 승인 건수를 칸 안에 숫자로 적은 히트맵. 영업팀 9월이 720건으로 가장 많고, 재무팀 6월과 7월은 값이 없습니다">
+      {byDept.map(([dept, values], r) => (
+        <g key={dept}>
+          <text x={x0 - 8} y={r * (h + gap) + h / 2} textAnchor="end" dominantBaseline="central" fontSize={12} fill="var(--ec-text-secondary)">{dept}</text>
+          {values.map((v, c) => {
+            const step = v === null ? null : stepOf(v, deptBounds);
+            return (
+              <g key={c}>
+                <rect x={x0 + c * (w + gap)} y={r * (h + gap)} width={w} height={h} fill={v === null ? NULL_FILL : STEP_FILL[step]} />
+                {v === null ? null : (
+                  <text x={x0 + c * (w + gap) + w / 2} y={r * (h + gap) + h / 2} textAnchor="middle" dominantBaseline="central" fontSize={12} fill={STEP_TEXT[step]}>{v.toLocaleString("ko-KR")}</text>
+                )}
+              </g>
+            );
+          })}
+        </g>
+      ))}
+      {months.map((m, c) => (
+        <text key={m} x={x0 + c * (w + gap) + w / 2} y={gridH + 10} textAnchor="middle" dominantBaseline="central" fontSize={12} fill="var(--ec-text-secondary)">{m}</text>
+      ))}
+      <Legend
+        x={0}
+        y={gridH + 44}
+        title="승인 건수(건)"
+        itemWidth={88}
+        items={[[STEP_FILL[0], "0~199"], [STEP_FILL[1], "200~399"], [STEP_FILL[2], "400~599"], [STEP_FILL[3], "600 이상"], [NULL_FILL, "값 없음"]]}
+      />
+    </svg>
+  );
+}
 
 export default function HeatmapPage() {
   return (
@@ -9,6 +119,9 @@ export default function HeatmapPage() {
       <Section title="컴포넌트">
         <P>전용 컴포넌트는 아직 없습니다. 아래 규칙에 맞춰 직접 구성합니다.</P>
         <P>차트 전체에 공통인 규칙(색, 범례, 설명 상자, 빈 상태)은 차트 기본 규칙을 따릅니다. 이 페이지는 히트맵에만 해당하는 것을 적습니다.</P>
+        <Figure caption="요일과 시간대별 접수 건수. 평일 9~16시에 몰리는 무늬가 색의 진하기로 드러납니다. 시간 이름은 3시간마다 적었고, 값이 없는 일요일 새벽은 회색입니다. 설명용 그림입니다. 전용 컴포넌트는 아직 없습니다.">
+          <DayHourHeatmap />
+        </Figure>
       </Section>
 
       <Section title="언제 쓰는가">
@@ -48,7 +161,7 @@ export default function HeatmapPage() {
             "값이 클수록 진하게 칠합니다.",
             "단계는 네 개에서 여섯 개까지입니다. 값을 몇 개의 범위로 끊어 칠합니다. 중간 단계가 더 필요하면 같은 색의 불투명도로 만듭니다.",
             "기준점(0, 목표값)을 사이에 두고 양쪽으로 갈리는 값은 두 색 계열을 씁니다. 기준에 가까울수록 연하게 칠합니다.",
-            <>값이 없는 칸은 회색(<Code>--ec-bg-page</Code>)으로 칠합니다. 가장 연한 단계와 구분되어야 합니다.</>,
+            <>값이 없는 칸은 회색(<Code>--ec-chart-null</Code> <Swatch token="chart-null" />)으로 칠합니다. 가장 연한 단계와 구분되어야 합니다.</>,
             "여러 색을 섞은 무지개 색은 쓰지 않습니다.",
           ]}
         />
@@ -63,6 +176,9 @@ export default function HeatmapPage() {
             "범례에는 단계마다 값 범위를 적고, 단위는 범례 제목에 한 번만 적습니다.",
           ]}
         />
+        <Figure caption="칸이 넉넉해 값을 칸 안에 적은 모습. 연한 두 단계에는 어두운 글자, 진한 두 단계에는 흰 글자를 썼습니다. 값이 0인 물류팀 8월은 가장 연한 단계이고, 값이 없는 재무팀 6·7월은 회색입니다. 설명용 그림입니다. 전용 컴포넌트는 아직 없습니다.">
+          <MonthDeptHeatmap />
+        </Figure>
       </Section>
 
       <Section title="동작">

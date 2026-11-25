@@ -1,5 +1,5 @@
 import React from "react";
-import { Box, Flex, Text, Skeleton, DonutChartSkeleton } from "@ec21rnc/ui";
+import { Box, Flex, Text, DonutChartSkeleton } from "@ec21rnc/ui";
 import { Chart } from "@ec21rnc/ui/chart";
 import { Page, Section, Sub, P, Rules, Table, Demo, DoDont, Code } from "../../kit.jsx";
 
@@ -16,16 +16,20 @@ const withSmall = { 계약서: 980, 견적서: 410, 보고서: 6 };
 const longNames = { "해외 거래처와 맺은 장기 공급 계약서": 46, "분기별 실적 검토 보고서와 첨부 자료": 31, "내부 결재용 지출 품의서": 23 };
 const count = (v) => `${Number(v).toLocaleString("ko-KR")}건`;
 
-function Metric({ value, label }) {
+// Chart.Donut은 범례를 오른쪽 끝에 붙입니다. 차트와 범례를 왼쪽에 모으려면 justifyContent="flex-end"를 줍니다.
+const left = { justifyContent: "flex-end" };
+
+// 가운데 글자는 SVG 글자입니다. 줄마다 tspan으로 나눠 넣습니다. y는 가운데에서 떨어진 거리(px)입니다.
+function centerLabel(value, label, y = 0) {
   return (
-    <Flex direction="column" alignItems="center">
-      <Text size={500} fontWeight={700}>
+    <>
+      <Text tag="tspan" x="0" y={y} size={500} fontWeight={700} fill="var(--ec-text-primary)">
         {value}
       </Text>
-      <Text size={100} color="text-secondary">
+      <Text tag="tspan" x="0" y={y + 20} size={100} fill="var(--ec-text-secondary)">
         {label}
       </Text>
-    </Flex>
+    </>
   );
 }
 
@@ -34,7 +38,7 @@ export default function DonutChartPage() {
     <Page meta={meta} lead="고리를 비율대로 나눠 전체에서 각 부분이 차지하는 몫을 보여 주는 차트입니다. 고리 전체가 100%입니다.">
       <Section title="언제 쓰는가">
         <Demo caption="문서 유형별 비중">
-          <Chart.Donut data={types} colorMap={gray} tooltipValueFormatter={count} plotWidth={180} plotHeight={180} aria-label="문서 유형별 비중" />
+          <Chart.Donut {...left} data={types} colorMap={gray} tooltipValueFormatter={count} plotWidth={188} plotHeight={188} aria-label="문서 유형별 비중" />
         </Demo>
         <Rules
           items={[
@@ -67,34 +71,38 @@ export default function DonutChartPage() {
 
       <Section title="크기">
         <Demo caption="큰 카드(폭 400px 이상) — 180px, 고리 두께 30px">
-          <Chart.Donut data={types} colorMap={gray} innerRadius={60} plotWidth={180} plotHeight={180} aria-label="큰 도넛 차트" />
+          <Chart.Donut {...left} data={types} colorMap={gray} innerRadius={60} plotWidth={188} plotHeight={188} aria-label="큰 도넛 차트" />
         </Demo>
         <Demo caption="작은 카드(폭 400px 미만) — 80px, 고리 두께 20px">
-          <Chart.Donut data={types} colorMap={gray} innerRadius={20} plotWidth={80} plotHeight={80} aria-label="작은 도넛 차트" />
+          <Chart.Donut {...left} data={types} colorMap={gray} innerRadius={20} plotWidth={88} plotHeight={88} aria-label="작은 도넛 차트" />
         </Demo>
         <Demo caption="요약 줄 안 — 24px, 고리 두께 6px. 범례와 설명 상자를 끕니다.">
-          <Chart.Donut data={progress} colorMap={progressColors} innerRadius={6} plotWidth={24} plotHeight={24} showLegend={false} showTooltip={false} aria-label="처리율 68%" />
-          <Text>처리율 68%</Text>
+          <Flex alignItems="center" gap={1}>
+            <Box w={32} h={32}>
+              <Chart.Donut data={progress} colorMap={progressColors} innerRadius={6} plotWidth={32} plotHeight={32} showLegend={false} showTooltip={false} aria-label="처리율 68%" />
+            </Box>
+            <Text>처리율 68%</Text>
+          </Flex>
         </Demo>
         <Table
           head={["자리", "지름", "고리 두께", "속성"]}
           rows={[
-            ["요약 줄 안", "24px", "6px", <Code>{"plotWidth={24} innerRadius={6}"}</Code>],
-            ["작은 카드 (폭 400px 미만)", "80px", "20px", <Code>{"plotWidth={80} innerRadius={20}"}</Code>],
-            ["큰 카드 (폭 400px 이상)", "180px", "30px", <Code>{"plotWidth={180} innerRadius={60}"}</Code>],
+            ["요약 줄 안", "24px", "6px", <Code>{"plotWidth={32} innerRadius={6}"}</Code>],
+            ["작은 카드 (폭 400px 미만)", "80px", "20px", <Code>{"plotWidth={88} innerRadius={20}"}</Code>],
+            ["큰 카드 (폭 400px 이상)", "180px", "30px", <Code>{"plotWidth={188} innerRadius={60}"}</Code>],
           ]}
         />
         <P>
-          바깥 반지름은 <Code>plotWidth</Code>의 절반으로 정해지고, 안쪽 반지름은 <Code>innerRadius</Code>로 줍니다. 세 가지 크기만 씁니다.
+          <Code>plotWidth</Code>와 <Code>plotHeight</Code>는 지름보다 8px 크게 줍니다. 마우스를 올린 조각이 커질 자리(사방 4px)입니다. 안쪽 반지름은 <Code>innerRadius</Code>로 줍니다. 세 가지 크기만 씁니다.
         </P>
       </Section>
 
       <Section title="반쪽 도넛">
         <Demo caption="반쪽 도넛 (halfsize) — 180 × 90px">
-          <Chart.Donut data={types} colorMap={gray} halfsize innerRadius={60} plotWidth={180} plotHeight={90} aria-label="반쪽 도넛 차트" />
+          <Chart.Donut {...left} data={types} colorMap={gray} halfsize innerRadius={60} plotWidth={188} plotHeight={94} aria-label="반쪽 도넛 차트" />
         </Demo>
         <Demo caption="작은 반쪽 도넛 — 80 × 40px">
-          <Chart.Donut data={types} colorMap={gray} halfsize innerRadius={20} plotWidth={80} plotHeight={40} aria-label="작은 반쪽 도넛 차트" />
+          <Chart.Donut {...left} data={types} colorMap={gray} halfsize innerRadius={20} plotWidth={88} plotHeight={44} aria-label="작은 반쪽 도넛 차트" />
         </Demo>
         <Table
           head={["자리", "크기", "고리 두께"]}
@@ -106,7 +114,7 @@ export default function DonutChartPage() {
         />
         <Rules
           items={[
-            <>높이를 아껴야 할 때 <Code>halfsize</Code>로 위쪽 반만 그립니다. 높이는 폭의 절반으로 줍니다.</>,
+            <>높이를 아껴야 할 때 <Code>halfsize</Code>로 위쪽 반만 그립니다. <Code>plotHeight</Code>는 <Code>plotWidth</Code>의 절반으로 줍니다.</>,
             "반쪽 도넛은 9시 방향에서 시작해 3시 방향에서 끝납니다.",
             "목표 대비 달성률처럼 한 값이 얼마나 찼는지 보여 줄 때 잘 맞습니다.",
           ]}
@@ -114,12 +122,12 @@ export default function DonutChartPage() {
       </Section>
 
       <Section title="범례">
-        <Demo caption="자리가 좁으면 범례를 차트 아래로 내립니다 (direction=&quot;column&quot;)">
-          <Chart.Donut data={types} colorMap={gray} direction="column" alignItems="center" innerRadius={60} plotWidth={180} plotHeight={180} aria-label="범례가 아래에 있는 도넛 차트" />
+        <Demo caption="자리가 좁으면 범례를 차트 아래로 내립니다 (direction=&quot;column-reverse&quot;)">
+          <Chart.Donut data={types} colorMap={gray} direction="column-reverse" alignItems="flex-start" legendProps={{ direction: "column" }} innerRadius={60} plotWidth={188} plotHeight={188} aria-label="범례가 아래에 있는 도넛 차트" />
         </Demo>
         <Demo caption="긴 이름은 다음 줄로 넘깁니다">
           <Box w={360}>
-            <Chart.Donut data={longNames} innerRadius={20} plotWidth={80} plotHeight={80} aria-label="이름이 긴 도넛 차트" />
+            <Chart.Donut {...left} data={longNames} legendProps={{ w: 250 }} innerRadius={20} plotWidth={88} plotHeight={88} aria-label="이름이 긴 도넛 차트" />
           </Box>
         </Demo>
         <Rules
@@ -137,14 +145,21 @@ export default function DonutChartPage() {
 
       <Section title="가운데 숫자">
         <Demo caption="큰 도넛의 가운데에 합계나 대표 값을 (innerLabel)">
-          <Chart.Donut data={types} colorMap={gray} innerRadius={60} innerLabel={<Metric value="1,200" label="전체 문서(건)" />} plotWidth={180} plotHeight={180} aria-label="가운데에 합계를 적은 도넛 차트" />
+          <Chart.Donut {...left} data={types} colorMap={gray} innerRadius={60} innerLabel={centerLabel("1,200", "전체 문서(건)")} plotWidth={188} plotHeight={188} aria-label="가운데에 합계를 적은 도넛 차트" />
         </Demo>
         <Demo caption="반쪽 도넛의 가운데 숫자">
-          <Chart.Donut data={progress} colorMap={progressColors} halfsize innerRadius={60} innerLabel={<Metric value="68%" label="처리율" />} showLegend={false} plotWidth={180} plotHeight={90} aria-label="처리율 68%" />
+          <Chart.Donut {...left} data={progress} colorMap={progressColors} halfsize innerRadius={60} innerLabel={centerLabel("68%", "처리율", -24)} showLegend={false} plotWidth={188} plotHeight={94} aria-label="처리율 68%" />
         </Demo>
         <Demo caption="작은 도넛은 숫자를 범례 위에 둡니다" column>
-          <Metric value="1,200" label="전체 문서(건)" />
-          <Chart.Donut data={types} colorMap={gray} innerRadius={20} plotWidth={80} plotHeight={80} aria-label="숫자를 범례 위에 둔 작은 도넛 차트" />
+          <Flex direction="column" ml={27}>
+            <Text size={500} fontWeight={700}>
+              1,200
+            </Text>
+            <Text size={100} color="text-secondary">
+              전체 문서(건)
+            </Text>
+          </Flex>
+          <Chart.Donut {...left} data={types} colorMap={gray} innerRadius={20} plotWidth={88} plotHeight={88} aria-label="숫자를 범례 위에 둔 작은 도넛 차트" />
         </Demo>
         <Table
           head={["요소", "모양"]}
@@ -168,7 +183,7 @@ export default function DonutChartPage() {
       <Section title="동작">
         <Rules
           items={[
-            "조각에 마우스를 올리면 그 조각의 바깥 반지름이 8px 커집니다.",
+            "조각에 마우스를 올리면 그 조각의 바깥 반지름이 4px 커집니다.",
             "설명 상자에는 그 조각의 이름과 값을 보여 줍니다.",
             <>아주 작은 도넛(24px)은 설명 상자를 끕니다(<Code>showTooltip={"{false}"}</Code>). 곁에 숫자를 글자로 적어 둡니다.</>,
             <>조각을 누를 수 있게 하려면 <Code>onClickPie</Code>를 씁니다. 누를 수 있는 조각은 마우스 커서가 손 모양으로 바뀝니다.</>,
@@ -180,7 +195,7 @@ export default function DonutChartPage() {
       <Section title="예외 상황">
         <Sub title="값이 0인 항목">
           <Demo>
-            <Chart.Donut data={withZero} innerRadius={20} plotWidth={80} plotHeight={80} aria-label="값이 0인 항목이 있는 도넛 차트" />
+            <Chart.Donut {...left} data={withZero} innerRadius={20} plotWidth={88} plotHeight={88} aria-label="값이 0인 항목이 있는 도넛 차트" />
           </Demo>
           <P>
             0은 데이터입니다. 고리에는 조각을 그리지 않지만 범례에는 항목을 남기고 값을 0으로 적습니다. 0의 글자색은 <Code>--ec-text-secondary</Code>입니다.
@@ -188,7 +203,7 @@ export default function DonutChartPage() {
         </Sub>
         <Sub title="1% 이하인 항목">
           <Demo>
-            <Chart.Donut data={withSmall} innerRadius={20} plotWidth={80} plotHeight={80} aria-label="아주 작은 항목이 있는 도넛 차트" />
+            <Chart.Donut {...left} data={withSmall} innerRadius={20} plotWidth={88} plotHeight={88} aria-label="아주 작은 항목이 있는 도넛 차트" />
           </Demo>
           <P>값이 1% 이하여도 조각이 사라지지 않게 고리에서는 1% 크기로 그립니다. 범례와 설명 상자에는 실제 값을 적습니다.</P>
         </Sub>
@@ -207,14 +222,10 @@ export default function DonutChartPage() {
         <Sub title="처음 불러올 때">
           <Demo>
             <Box w={180}>
-              <Skeleton h={180}>
-                <DonutChartSkeleton />
-              </Skeleton>
+              <DonutChartSkeleton h={180} />
             </Box>
             <Box w={180}>
-              <Skeleton h={90}>
-                <DonutChartSkeleton halfsize />
-              </Skeleton>
+              <DonutChartSkeleton halfsize h={90} />
             </Box>
           </Demo>
           <P>
@@ -226,11 +237,11 @@ export default function DonutChartPage() {
       <Section title="쓰는 법">
         <DoDont
           good={{
-            demo: <Chart.Donut data={topFive} colorMap={gray} innerRadius={20} plotWidth={80} plotHeight={80} showLegend={false} aria-label="큰 항목 다섯과 기타로 묶은 도넛 차트" />,
+            demo: <Chart.Donut {...left} data={topFive} colorMap={gray} innerRadius={20} plotWidth={88} plotHeight={88} showLegend={false} aria-label="큰 항목 다섯과 기타로 묶은 도넛 차트" />,
             text: "항목이 다섯을 넘으면 큰 것 다섯만 남기고 나머지는 \"기타\"로 묶습니다.",
           }}
           bad={{
-            demo: <Chart.Donut data={many} innerRadius={20} plotWidth={80} plotHeight={80} showLegend={false} aria-label="항목이 아홉인 도넛 차트" />,
+            demo: <Chart.Donut {...left} data={many} innerRadius={20} plotWidth={88} plotHeight={88} showLegend={false} aria-label="항목이 아홉인 도넛 차트" />,
             text: "항목을 많이 넣지 않습니다. 조각이 작아져 색도 크기도 구분되지 않습니다.",
           }}
         />

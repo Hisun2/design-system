@@ -1,7 +1,137 @@
 import React from "react";
-import { Page, Section, Sub, P, Rules, Table, DoDont, Code, Swatch } from "../../kit.jsx";
+import { Page, Section, Sub, P, Rules, Table, DoDont, Code, Swatch, Figure } from "../../kit.jsx";
 
 export const meta = { title: "카기 차트", order: 31 };
+
+const fmt = (n) => n.toLocaleString("ko-KR");
+// 하루 단가(원). 2026-08-03부터 하루에 하나씩.
+const prices = [
+  1200, 1215, 1240, 1262, 1250, 1228, 1205, 1190, 1178, 1195, 1230, 1255, 1280, 1301, 1290, 1262, 1240, 1215, 1188, 1170, 1150,
+  1162, 1198, 1224, 1210, 1175, 1140, 1128, 1160, 1185, 1210, 1236, 1268, 1290, 1312, 1295, 1270, 1255, 1248, 1275, 1305, 1330, 1342,
+].map((v, i) => ({ v, date: new Date(Date.UTC(2026, 7, 3 + i)).toISOString().slice(0, 10) }));
+
+/** 값이 전환 폭(비율) 이상 반대로 움직인 곳만 남깁니다. 돌려주는 것은 꺾인 지점의 목록입니다. */
+function turningPoints(series, reversal) {
+  const turns = [series[0]];
+  let dir = 0;
+  let ext = series[0];
+  for (const p of series.slice(1)) {
+    const move = (p.v - ext.v) / ext.v;
+    if (dir === 0) {
+      if (Math.abs(move) >= reversal) { dir = Math.sign(move); ext = p; }
+    } else if (move * dir > 0) {
+      ext = p;
+    } else if (-move * dir >= reversal) {
+      turns.push(ext);
+      dir = -dir;
+      ext = p;
+    }
+  }
+  turns.push(ext);
+  return turns;
+}
+
+/**
+ * 꺾인 지점의 값 목록을 선 조각으로 바꿉니다. 직전 고점을 넘으면 그 높이부터 굵은 선,
+ * 직전 저점 아래로 내려가면 그 높이부터 가는 선이 됩니다.
+ */
+function kagiSegments(values) {
+  const segments = [];
+  let thick = values[1] > values[0];
+  for (let i = 0; i < values.length - 1; i += 1) {
+    const from = values[i];
+    const to = values[i + 1];
+    const prior = values[i - 1];
+    const up = to > from;
+    const crosses = i > 0 && (up ? !thick && to > prior : thick && to < prior);
+    if (crosses) {
+      segments.push({ col: i, from, to: prior, thick });
+      thick = !thick;
+      segments.push({ col: i, from: prior, to, thick });
+    } else {
+      segments.push({ col: i, from, to, thick });
+    }
+    if (i < values.length - 2) segments.push({ col: i, toCol: i + 1, from: to, to, thick });
+  }
+  return segments;
+}
+
+function KagiLines({ values, x, y, twoColors }) {
+  return kagiSegments(values).map((s, i) => (
+    <line
+      key={i}
+      x1={x(s.col)}
+      x2={x(s.toCol ?? s.col)}
+      y1={y(s.from)}
+      y2={y(s.to)}
+      stroke={twoColors && !s.thick ? "var(--ec-chart-4)" : "var(--ec-chart-1)"}
+      strokeWidth={s.thick ? 3 : 1}
+      strokeLinecap="square"
+    />
+  ));
+}
+
+function KagiChart({ twoColors, label }) {
+  const turns = turningPoints(prices, 0.04);
+  const left = 56;
+  const top = 36;
+  const h = 208;
+  const lo = 1100;
+  const hi = 1360;
+  const x = (i) => left + 24 + i * 52;
+  const y = (v) => top + h - ((v - lo) / (hi - lo)) * h;
+  const thin = twoColors ? "var(--ec-chart-4)" : "var(--ec-chart-1)";
+  return (
+    <svg viewBox={`0 0 560 ${top + h + 28}`} width={560} role="img" aria-label={label}>
+      <line x1={left} x2={left + 24} y1={8} y2={8} stroke="var(--ec-chart-1)" strokeWidth={3} />
+      <text x={left + 30} y={8} dominantBaseline="central" fontSize={12} fill="var(--ec-text-secondary)">굵은 선: 오름세</text>
+      <line x1={left + 136} x2={left + 160} y1={8} y2={8} stroke={thin} strokeWidth={1} />
+      <text x={left + 166} y={8} dominantBaseline="central" fontSize={12} fill="var(--ec-text-secondary)">가는 선: 내림세</text>
+      <text x={left + 272} y={8} dominantBaseline="central" fontSize={12} fill="var(--ec-text-secondary)">전환 폭: 4%</text>
+      <text x={left - 8} y={top - 14} textAnchor="end" dominantBaseline="central" fontSize={12} fill="var(--ec-text-secondary)">단가(원)</text>
+      {[1100, 1150, 1200, 1250, 1300, 1350].map((t) => (
+        <g key={t}>
+          <line x1={left} x2={552} y1={y(t)} y2={y(t)} stroke="var(--ec-border)" />
+          <text x={left - 8} y={y(t)} textAnchor="end" dominantBaseline="central" fontSize={12} fill="var(--ec-text-secondary)">{fmt(t)}</text>
+        </g>
+      ))}
+      <KagiLines values={turns.map((t) => t.v)} x={x} y={y} twoColors={twoColors} />
+      {turns.slice(0, -1).map((t, i) =>
+        i % 2 ? null : (
+          <text key={t.date} x={x(i)} y={top + h + 16} textAnchor="middle" dominantBaseline="central" fontSize={12} fill="var(--ec-text-secondary)">{t.date}</text>
+        ),
+      )}
+    </svg>
+  );
+}
+
+/** 읽는 법. 꺾이는 곳, 굵어지는 곳, 가늘어지는 곳을 짚어 줍니다. */
+function KagiAnatomy() {
+  const values = [20, 70, 45, 90, 30, 60, 12, 80];
+  const x = (i) => 40 + i * 44;
+  const y = (v) => 200 - v * 1.9;
+  const note = { fontSize: 12, fill: "var(--ec-text-secondary)", dominantBaseline: "central" };
+  const guide = { stroke: "var(--ec-border-control)", strokeDasharray: "3 3" };
+  return (
+    <svg viewBox="0 0 560 208" width={560} role="img" aria-label="카기 차트 읽는 법. 값이 전환 폭 이상 반대로 움직이면 꺾이고, 직전 저점 아래로 내려가면 가는 선, 직전 고점을 넘으면 굵은 선이 됩니다">
+      <line x1={x(2)} x2={x(3) + 20} y1={y(45)} y2={y(45)} {...guide} />
+      <line x1={x(5)} x2={x(6) + 20} y1={y(60)} y2={y(60)} {...guide} />
+      <KagiLines values={values} x={x} y={y} />
+      <line x1={x(1) + 10} x2={x(1) + 10} y1={y(70)} y2={y(45)} stroke="var(--ec-text-secondary)" />
+      <line x1={x(1) + 6} x2={x(1) + 14} y1={y(70)} y2={y(70)} stroke="var(--ec-text-secondary)" />
+      <line x1={x(1) + 6} x2={x(1) + 14} y1={y(45)} y2={y(45)} stroke="var(--ec-text-secondary)" />
+      <text x={400} y={24} {...note} fill="var(--ec-text-primary)">① 전환 폭 이상 반대로 움직이면</text>
+      <text x={416} y={42} {...note}>꺾어서 새 세로선을 시작</text>
+      <text x={400} y={78} {...note} fill="var(--ec-text-primary)">② 직전 저점 아래로 내려가면</text>
+      <text x={416} y={96} {...note}>그 높이부터 가는 선(내림세)</text>
+      <text x={400} y={132} {...note} fill="var(--ec-text-primary)">③ 직전 고점을 넘으면</text>
+      <text x={416} y={150} {...note}>그 높이부터 굵은 선(오름세)</text>
+      <text x={x(1) + 18} y={(y(70) + y(45)) / 2} {...note} fill="var(--ec-text-primary)">①</text>
+      <text x={x(3) + 26} y={y(45)} {...note} fill="var(--ec-text-primary)">②</text>
+      <text x={x(6) + 26} y={y(60)} {...note} fill="var(--ec-text-primary)">③</text>
+    </svg>
+  );
+}
 
 export default function KagiPage() {
   return (
@@ -9,6 +139,9 @@ export default function KagiPage() {
       <Section title="컴포넌트">
         <P>전용 컴포넌트는 아직 없습니다. 아래 규칙에 맞춰 직접 구성합니다.</P>
         <P>차트 전체에 공통인 규칙(색, 축, 범례, 설명 상자, 빈 상태)은 차트 기본 규칙을 따릅니다. 이 페이지는 카기 차트에만 해당하는 것을 적습니다.</P>
+        <Figure caption="43일 동안의 단가를 전환 폭 4%로 그린 카기 차트. 값이 4% 이상 반대로 움직인 여덟 번만 선이 꺾입니다. 가로축은 꺾인 순서이고, 날짜는 꺾인 지점에만 하나 건너 하나씩 적었습니다. 설명용 그림입니다. 전용 컴포넌트는 아직 없습니다.">
+          <KagiChart label="단가의 카기 차트. 1,200원에서 시작해 오르내리다 1,128원까지 내려간 뒤 1,342원까지 오릅니다. 직전 고점을 넘은 구간은 굵은 선, 직전 저점 아래로 내려간 구간은 가는 선입니다" />
+        </Figure>
       </Section>
 
       <Section title="언제 쓰는가">
@@ -42,6 +175,9 @@ export default function KagiPage() {
             "전환 폭이 얼마인지 차트 제목 아래나 범례에 반드시 적습니다. 이 값이 바뀌면 차트 모양이 완전히 달라집니다.",
           ]}
         />
+        <Figure caption="읽는 법. 선은 직각으로만 꺾이고, 굵기는 세로선 중간에서도 바뀝니다. 점선은 직전 저점과 직전 고점의 높이입니다. 설명용 그림입니다. 전용 컴포넌트는 아직 없습니다.">
+          <KagiAnatomy />
+        </Figure>
       </Section>
 
       <Section title="색">
@@ -53,6 +189,9 @@ export default function KagiPage() {
             <>눈금선은 <Code>--ec-border</Code>, 축 글자는 <Code>--ec-text-secondary</Code>입니다.</>,
           ]}
         />
+        <Figure caption="같은 데이터를 색으로도 구분한 모습. 내림세의 가는 선만 주황으로 바꾸었고 굵기 차이는 그대로입니다. 설명용 그림입니다. 전용 컴포넌트는 아직 없습니다.">
+          <KagiChart twoColors label="오름세는 파란 굵은 선, 내림세는 주황 가는 선으로 그린 단가의 카기 차트" />
+        </Figure>
       </Section>
 
       <Section title="글자">

@@ -1,6 +1,6 @@
 import React from "react";
 import { Plot, RadialTree } from "@ec21rnc/ui/chart";
-import { RadialTreeChartSkeleton, Box } from "@ec21rnc/ui";
+import { RadialTreeChartSkeleton, Box, Text } from "@ec21rnc/ui";
 import { Page, Section, Sub, P, Rules, Table, Demo, DoDont, Code } from "../../kit.jsx";
 
 export const meta = { title: "방사형 나무 차트", order: 24 };
@@ -23,7 +23,15 @@ function Tree({ data, size = 520, title = "거래처 관리", ...rest }) {
             <RadialTree.Radian.Cap />
             <RadialTree.Radian.Icon />
           </RadialTree.Radian>
-          <RadialTree.Title>{title}</RadialTree.Title>
+          <RadialTree.Title>
+            {Array.isArray(title)
+              ? title.map((line, i) => (
+                  <Text tag="tspan" key={line} x={size / 2} dy={i === 0 ? `${-(title.length - 1) * 0.6}em` : "1.2em"}>
+                    {line}
+                  </Text>
+                ))
+              : title}
+          </RadialTree.Title>
         </RadialTree>
       </Plot>
     </Client>
@@ -120,9 +128,15 @@ export default function RadialTreePage() {
         </Sub>
         <Sub title="가운데 글자가 아주 길 때">
           <Demo>
-            <Tree data={data.slice(0, 8)} size={420} title={"거래처별 계약과\n납품 관리 현황"} />
+            <Tree data={data.slice(0, 8)} size={480} centralMargin={90} title={["거래처별 계약과", "납품 관리 현황"]} />
           </Demo>
-          <P>가운데 글자는 말줄임표로 자르지 않습니다. 다음 줄로 넘깁니다.</P>
+          <Rules
+            items={[
+              "가운데 글자는 말줄임표로 자르지 않습니다. 다음 줄로 넘깁니다.",
+              <>줄은 저절로 바뀌지 않습니다. 끊을 자리를 정해 <Code>RadialTree.Title</Code> 안에 줄마다 <Code>tspan</Code>으로 나눠 넣습니다.</>,
+              <>선이 글자를 지나가지 않게 <Code>centralMargin</Code>(가운데에서 선이 시작하는 곳까지의 거리, 기본 50px)을 가장 긴 줄의 절반보다 크게 줍니다.</>,
+            ]}
+          />
         </Sub>
         <Sub title="데이터가 없을 때">
           <P>차트를 그리지 않고, 데이터가 없다는 안내 문구를 보여 줍니다. 무엇을 하면 채워지는지 알 수 있으면 함께 적습니다.</P>

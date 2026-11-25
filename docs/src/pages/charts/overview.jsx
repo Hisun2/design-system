@@ -1,5 +1,6 @@
 import React from "react";
 import { Chart } from "@ec21rnc/ui/chart";
+import { scaleLinear } from "@ec21rnc/ui/chart";
 import { Page, Section, P, Rules, Table, Demo, DoDont } from "../../kit.jsx";
 
 export const meta = { title: "차트 한눈에 보기", order: 1 };
@@ -19,6 +20,13 @@ const byTeam = [
   { 부서: "인사", 건수: 14 },
 ];
 const month = (v) => `${v}월`;
+// 꺾은선의 축을 직접 정합니다. 기본값으로 두면 세 자리 눈금 숫자가 잘리고 "1.5월" 같은 눈금이 생깁니다.
+const monthlyAxes = {
+  xScale: scaleLinear().domain([1, 6]).range([48, 480 - 24]),
+  yScale: scaleLinear().domain([0, 800]).range([180 - 32, 12]),
+  xTicksCount: 5,
+  yTicksCount: 4,
+};
 
 export default function ChartOverviewPage() {
   return (
@@ -42,13 +50,13 @@ export default function ChartOverviewPage() {
 
       <Section title="질문별 예시">
         <Demo caption="추이 — 월별 수집 건수" column>
-          <Chart.Line data={monthly} groupKey="월" plotWidth={480} plotHeight={180} axisXValueFormatter={month} tooltipTitleFormatter={month} aria-label="월별 수집 건수" />
+          <Chart.Line data={monthly} groupKey="월" {...monthlyAxes} plotWidth={480} plotHeight={180} axisXValueFormatter={month} tooltipTitleFormatter={month} aria-label="월별 수집 건수" />
         </Demo>
         <Demo caption="비교 — 부서별 처리 건수" column>
-          <Chart.Bar data={byTeam} groupKey="부서" plotWidth={480} plotHeight={180} aria-label="부서별 처리 건수" />
+          <Chart.Bar data={byTeam} groupKey="부서" yTicksCount={5} maxBarSize={32} plotWidth={480} plotHeight={180} aria-label="부서별 처리 건수" />
         </Demo>
         <Demo caption="비중 — 문서 유형별 비중" column>
-          <Chart.Donut data={{ 계약서: 52, 견적서: 24, 보고서: 16, 기타: 8 }} plotWidth={180} plotHeight={180} aria-label="문서 유형별 비중" />
+          <Chart.Donut data={{ 계약서: 52, 견적서: 24, 보고서: 16, 기타: 8 }} colorMap={{ 기타: "var(--ec-chart-other)" }} justifyContent="flex-end" plotWidth={188} plotHeight={188} aria-label="문서 유형별 비중" />
         </Demo>
       </Section>
 

@@ -1,6 +1,7 @@
 import React from "react";
-import { Box, Flex, Text, Skeleton, CompactHorizontalBarChartSkeleton } from "@ec21rnc/ui";
-import { Chart } from "@ec21rnc/ui/chart";
+import { Box, Flex, Text, CompactHorizontalBarChartSkeleton } from "@ec21rnc/ui";
+import { Chart, Plot, CompactHorizontalBar } from "@ec21rnc/ui/chart";
+import { scaleBand, scaleLinear } from "@ec21rnc/ui/chart";
 import { Page, Section, Sub, P, Rules, Table, Demo, DoDont, Code } from "../../kit.jsx";
 
 export const meta = { title: "촘촘한 가로 막대 차트", order: 15 };
@@ -19,6 +20,13 @@ const longNames = [
 const unsorted = [share[2], share[0], share[3], share[1]];
 const zeros = [share[0], share[1], { 유형: "보고서", 건수: 0 }];
 const few = share.slice(0, 2);
+// 한 줄의 높이는 44px입니다. 이름·값 한 줄(20px)과 막대(12px)가 겹치지 않게 줄 간격을 직접 정합니다.
+const ROW = 44;
+const rows = (data) => ({
+  plotHeight: data.length * ROW,
+  yScale: scaleBand().range([12, data.length * ROW]).domain(data.map((d) => d.유형)).paddingInner(12 / ROW),
+});
+const longScale = scaleLinear().range([0, 280]).domain([0, longNames.reduce((sum, d) => sum + d.건수, 0)]);
 const count = (v) => `${Number(v).toLocaleString("ko-KR")}건`;
 
 export default function CompactHorizontalBarChartPage() {
@@ -27,7 +35,7 @@ export default function CompactHorizontalBarChartPage() {
       <Section title="언제 쓰는가">
         <Demo caption="문서 유형별 비중">
           <Box w={360}>
-            <Chart.CompactHorizontalBar data={share} x="건수" y="유형" tooltipValueFormatter={count} plotWidth={360} plotHeight={160} aria-label="문서 유형별 비중" />
+            <Chart.CompactHorizontalBar data={share} x="건수" y="유형" tooltipValueFormatter={count} plotWidth={360} {...rows(share)} aria-label="문서 유형별 비중" />
           </Box>
         </Demo>
         <Table
@@ -58,7 +66,7 @@ export default function CompactHorizontalBarChartPage() {
             <><Code>Chart.CompactHorizontalBar</Code>에 값이 든 칸 이름을 <Code>x</Code>, 항목 이름이 든 칸 이름을 <Code>y</Code>로 줍니다.</>,
             "데이터에는 비중이 아니라 원래 값(건수, 금액)을 넣습니다. 비중은 차트가 계산합니다.",
             "한 항목에는 값이 하나만 있습니다. 한 줄에 여러 계열을 쌓을 수 없습니다.",
-            "차트의 높이는 항목 수에 맞춥니다. 항목 하나에 40px 안팎을 잡습니다.",
+            "차트의 높이는 항목 수에 맞춥니다. 항목 하나에 44px을 잡습니다.",
           ]}
         />
       </Section>
@@ -70,7 +78,20 @@ export default function CompactHorizontalBarChartPage() {
       <Section title="항목 이름">
         <Demo caption="긴 이름은 말줄임표로 줄어듭니다">
           <Box w={280}>
-            <Chart.CompactHorizontalBar data={longNames} x="건수" y="유형" tooltipValueFormatter={count} plotWidth={280} plotHeight={130} aria-label="이름이 긴 문서 유형별 비중" />
+            <Plot data={longNames} scale={[longScale, rows(longNames).yScale]} width={280} height={rows(longNames).plotHeight} aria-label="이름이 긴 문서 유형별 비중">
+              <CompactHorizontalBar x="건수" y="유형">
+                <CompactHorizontalBar.Hover />
+                <CompactHorizontalBar.Annotation>
+                  <CompactHorizontalBar.Label tag={Text} ellipsis wMin={0} />
+                  <CompactHorizontalBar.Percent />
+                  <CompactHorizontalBar.Value />
+                </CompactHorizontalBar.Annotation>
+                <CompactHorizontalBar.Bar>
+                  <CompactHorizontalBar.Bar.Background />
+                  <CompactHorizontalBar.Bar.Fill />
+                </CompactHorizontalBar.Bar>
+              </CompactHorizontalBar>
+            </Plot>
           </Box>
         </Demo>
         <Rules
@@ -107,7 +128,7 @@ export default function CompactHorizontalBarChartPage() {
         <Sub title="항목이 더 없을 때">
           <Demo column>
             <Box w={320}>
-              <Chart.CompactHorizontalBar data={few} x="건수" y="유형" tooltipValueFormatter={count} plotWidth={320} plotHeight={80} aria-label="항목이 둘뿐인 촘촘한 가로 막대 차트" />
+              <Chart.CompactHorizontalBar data={few} x="건수" y="유형" tooltipValueFormatter={count} plotWidth={320} {...rows(few)} aria-label="항목이 둘뿐인 촘촘한 가로 막대 차트" />
             </Box>
             <Flex mt={8}>
               <Text color="text-secondary">더 이상 결과가 없습니다</Text>
@@ -120,7 +141,7 @@ export default function CompactHorizontalBarChartPage() {
         <Sub title="값이 0일 때">
           <Demo>
             <Box w={320}>
-              <Chart.CompactHorizontalBar data={zeros} x="건수" y="유형" tooltipValueFormatter={count} plotWidth={320} plotHeight={120} aria-label="값이 0인 항목이 있는 촘촘한 가로 막대 차트" />
+              <Chart.CompactHorizontalBar data={zeros} x="건수" y="유형" tooltipValueFormatter={count} plotWidth={320} {...rows(zeros)} aria-label="값이 0인 항목이 있는 촘촘한 가로 막대 차트" />
             </Box>
           </Demo>
           <Rules
@@ -143,9 +164,7 @@ export default function CompactHorizontalBarChartPage() {
         <Sub title="처음 불러올 때">
           <Demo>
             <Box w={320}>
-              <Skeleton h={120}>
-                <CompactHorizontalBarChartSkeleton />
-              </Skeleton>
+              <CompactHorizontalBarChartSkeleton h={120} />
             </Box>
           </Demo>
           <P>
@@ -159,7 +178,7 @@ export default function CompactHorizontalBarChartPage() {
           good={{
             demo: (
               <Box w={240}>
-                <Chart.CompactHorizontalBar data={share} x="건수" y="유형" tooltipValueFormatter={count} plotWidth={240} plotHeight={150} aria-label="큰 순서로 놓은 비중" />
+                <Chart.CompactHorizontalBar data={share} x="건수" y="유형" tooltipValueFormatter={count} plotWidth={240} {...rows(share)} aria-label="큰 순서로 놓은 비중" />
               </Box>
             ),
             text: "값이 큰 것부터 놓고, \"기타\"는 크기와 상관없이 맨 끝에 둡니다.",
@@ -167,7 +186,7 @@ export default function CompactHorizontalBarChartPage() {
           bad={{
             demo: (
               <Box w={240}>
-                <Chart.CompactHorizontalBar data={unsorted} x="건수" y="유형" tooltipValueFormatter={count} plotWidth={240} plotHeight={150} aria-label="순서 없이 놓은 비중" />
+                <Chart.CompactHorizontalBar data={unsorted} x="건수" y="유형" tooltipValueFormatter={count} plotWidth={240} {...rows(unsorted)} aria-label="순서 없이 놓은 비중" />
               </Box>
             ),
             text: "이유 없는 순서로 놓지 않습니다.",

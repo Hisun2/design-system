@@ -1,7 +1,75 @@
 import React from "react";
-import { Page, Section, Sub, P, Rules, Table, DoDont, Code, Swatch } from "../../kit.jsx";
+import { Page, Section, Sub, P, Rules, Table, DoDont, Code, Swatch, Figure } from "../../kit.jsx";
 
 export const meta = { title: "지도 색칠 차트", order: 28 };
+
+// 시·도 열일곱 곳을 실제 위치와 비슷하게 놓은 칸 지도. [이름, 열, 행, 인구 만 명당 거래처 수(곳), 지난해 대비 증감(%)]
+// 실제 경계가 아닙니다. null은 값 없음.
+const regions = [
+  ["인천", 0, 0, 14, 12], ["서울", 1, 0, 26, 24], ["경기", 2, 0, 21, 15], ["강원", 3, 0, 3, -12],
+  ["충남", 0, 1, 8, 4], ["세종", 1, 1, 12, 31], ["충북", 2, 1, 7, -3], ["경북", 3, 1, 6, -14],
+  ["전북", 0, 2, 4, -22], ["대전", 1, 2, 11, 6], ["대구", 2, 2, 13, -8], ["울산", 3, 2, 17, 2],
+  ["전남", 0, 3, 2, -17], ["광주", 1, 3, 9, -5], ["경남", 2, 3, 10, 9], ["부산", 3, 3, 22, 18],
+  ["제주", 0, 4, null, null],
+];
+const NULL_FILL = "var(--ec-chart-null)";
+const sequential = {
+  title: "인구 만 명당 거래처 수(곳)",
+  bounds: [5, 10, 20],
+  fills: ["var(--ec-chart-13)", "var(--ec-chart-1)", "var(--ec-chart-7)", "var(--ec-chart-19)"],
+  // 연한 두 단계에는 어두운 글자, 진한 두 단계에는 흰 글자.
+  texts: ["var(--ec-text-primary)", "var(--ec-text-primary)", "var(--ec-text-invert)", "var(--ec-text-invert)"],
+  labels: ["0~4", "5~9", "10~19", "20 이상"],
+};
+const diverging = {
+  title: "지난해 대비 거래처 수 증감(%)",
+  bounds: [-19, -9, 0, 10, 20],
+  fills: ["var(--ec-chart-10)", "var(--ec-chart-4)", "var(--ec-chart-16)", "var(--ec-chart-13)", "var(--ec-chart-1)", "var(--ec-chart-7)"],
+  labels: ["−20 이하", "−19~−10", "−9~−1", "0~9", "10~19", "20 이상"],
+};
+
+/** 칸 지도. inside면 이름을 칸 안에, 아니면 칸 아래에 적습니다. */
+function TileMap({ scale, valueIndex, inside, label }) {
+  const w = 60;
+  const h = inside ? 40 : 28;
+  const pitchX = w + 1;
+  const pitchY = inside ? h + 1 : h + 22;
+  const mapH = 5 * pitchY;
+  const legendW = scale.labels.length > 4 ? 72 : 84;
+  return (
+    <svg viewBox={`0 0 560 ${mapH + 56}`} width={560} role="img" aria-label={label}>
+      {regions.map((region) => {
+        const [name, col, row] = region;
+        const v = region[valueIndex];
+        const step = v === null ? null : scale.bounds.filter((b) => v >= b).length;
+        const x = col * pitchX;
+        const y = row * pitchY;
+        return (
+          <g key={name}>
+            <rect x={x} y={y} width={w} height={h} fill={v === null ? NULL_FILL : scale.fills[step]} />
+            <text
+              x={x + w / 2}
+              y={inside ? y + h / 2 : y + h + 10}
+              textAnchor="middle"
+              dominantBaseline="central"
+              fontSize={12}
+              fill={inside ? (v === null ? "var(--ec-text-secondary)" : scale.texts[step]) : "var(--ec-text-secondary)"}
+            >
+              {name}
+            </text>
+          </g>
+        );
+      })}
+      <text x={0} y={mapH + 14} dominantBaseline="central" fontSize={12} fill="var(--ec-text-secondary)">{scale.title}</text>
+      {[...scale.labels.map((text, i) => [scale.fills[i], text]), [NULL_FILL, "값 없음"]].map(([fill, text], i) => (
+        <g key={text}>
+          <rect x={i * legendW} y={mapH + 34} width={12} height={12} rx={2} fill={fill} />
+          <text x={i * legendW + 18} y={mapH + 40} dominantBaseline="central" fontSize={12} fill="var(--ec-text-secondary)">{text}</text>
+        </g>
+      ))}
+    </svg>
+  );
+}
 
 export default function ChoroplethMapPage() {
   return (
@@ -9,6 +77,9 @@ export default function ChoroplethMapPage() {
       <Section title="컴포넌트">
         <P>전용 컴포넌트는 아직 없습니다. 아래 규칙에 맞춰 직접 구성합니다.</P>
         <P>차트 전체에 공통인 규칙(색, 범례, 설명 상자, 빈 상태)은 차트 기본 규칙을 따릅니다. 이 페이지는 지도 색칠 차트에만 해당하는 것을 적습니다.</P>
+        <Figure caption="시·도별 인구 만 명당 거래처 수를 네 단계의 파랑으로 칠한 모습. 값이 클수록 진하고, 값이 없는 제주는 회색입니다. 이 그림은 경계 데이터가 없어 시·도를 같은 크기의 칸으로 바꿔 실제 위치와 비슷하게 놓은 것입니다. 실제 지도를 그리려면 구역의 경계 데이터가 필요합니다. 설명용 그림입니다. 전용 컴포넌트는 아직 없습니다.">
+          <TileMap scale={sequential} valueIndex={3} inside label="시·도 열일곱 곳을 칸으로 놓고 인구 만 명당 거래처 수에 따라 네 단계의 파랑으로 칠한 지도. 서울, 경기, 부산이 가장 진하고 제주는 값이 없습니다" />
+        </Figure>
       </Section>
 
       <Section title="언제 쓰는가">
@@ -53,10 +124,13 @@ export default function ChoroplethMapPage() {
         </Sub>
         <Sub title="기준점에서 양쪽으로 갈리는 값">
           <P>증가와 감소처럼 기준(0)을 사이에 두고 양쪽으로 갈리는 값은 두 색 계열을 씁니다. 기준에 가까울수록 연하게, 멀수록 진하게 칠합니다. 예: 감소는 주황 계열(<Code>--ec-chart-16</Code> → <Code>--ec-chart-4</Code> → <Code>--ec-chart-10</Code>), 증가는 파랑 계열(<Code>--ec-chart-13</Code> → <Code>--ec-chart-1</Code> → <Code>--ec-chart-7</Code>).</P>
+          <Figure caption="지난해 대비 증감을 두 색 계열로 칠한 모습. 0에 가까울수록 연하고, 감소는 주황, 증가는 파랑입니다. 범례의 범위는 겹치거나 비는 곳 없이 이어집니다. 칸으로 바꿔 그린 지도이며 실제 지도에는 경계 데이터가 필요합니다. 설명용 그림입니다. 전용 컴포넌트는 아직 없습니다.">
+            <TileMap scale={diverging} valueIndex={4} label="시·도 열일곱 곳의 지난해 대비 거래처 수 증감을 주황과 파랑 두 계열로 칠한 지도. 서울과 세종이 가장 크게 늘었고 전북이 가장 크게 줄었습니다" />
+          </Figure>
         </Sub>
         <Sub title="값이 없는 구역">
           <P>
-            회색(<Code>--ec-border</Code>) <Swatch token="border" />으로 칠합니다. 가장 연한 단계의 색과 헷갈리지 않아야 합니다. 범례에 "값 없음"을 따로 적습니다.
+            회색(<Code>--ec-chart-null</Code>) <Swatch token="chart-null" />으로 칠합니다. 가장 연한 단계의 색과 헷갈리지 않아야 합니다. 범례에 "값 없음"을 따로 적습니다.
           </P>
         </Sub>
       </Section>

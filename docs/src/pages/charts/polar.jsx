@@ -1,7 +1,58 @@
 import React from "react";
-import { Page, Section, Sub, P, Rules, Table, DoDont, Code, Swatch } from "../../kit.jsx";
+import { Page, Section, Sub, P, Rules, Table, DoDont, Code, Swatch, Figure } from "../../kit.jsx";
 
 export const meta = { title: "극좌표 차트", order: 33 };
+
+const fmt = (n) => n.toLocaleString("ko-KR");
+const monthly = [820, 760, 1010, 1180, 1240, 1320, 1490, 1410, 1150, 980, 870, 1060].map((v, i) => [`${i + 1}월`, v]);
+const hourly = [12, 8, 5, 4, 6, 14, 38, 96, 182, 264, 298, 240, 150, 226, 282, 254, 208, 156, 98, 64, 48, 36, 26, 18].map((v, i) => [`${i}시`, v]);
+const weekly = [["월", 420], ["화", 510], ["수", 480], ["목", 530], ["금", 390], ["토", 0], ["일", null]];
+
+/**
+ * 극좌표 막대. 12시 방향에서 시작해 시계 방향으로 돕니다. 가운데 빈 원의 둘레가 0입니다.
+ * 값이 0이거나 null인 조각은 칠하지 않고 자리만 비워 둡니다.
+ */
+function PolarBars({ data, max, ticks, labelEvery = 1, highlight, size = 320, label }) {
+  const cx = 280;
+  const cy = size / 2;
+  const hole = 20;
+  const outer = size / 2 - 40;
+  const step = (2 * Math.PI) / data.length;
+  const radius = (v) => hole + (v / max) * (outer - hole);
+  const at = (r, a) => [cx + r * Math.sin(a), cy - r * Math.cos(a)];
+  const wedge = (r, a0, a1) => {
+    const [x0, y0] = at(r, a0);
+    const [x1, y1] = at(r, a1);
+    const [x2, y2] = at(hole, a1);
+    const [x3, y3] = at(hole, a0);
+    return `M${x0} ${y0}A${r} ${r} 0 0 1 ${x1} ${y1}L${x2} ${y2}A${hole} ${hole} 0 0 0 ${x3} ${y3}Z`;
+  };
+  return (
+    <svg viewBox={`0 0 560 ${size}`} width={560} role="img" aria-label={label}>
+      {data.map(([name, v], i) =>
+        v ? (
+          <path key={name} d={wedge(radius(v), i * step, (i + 1) * step)} fill={name === highlight ? "var(--ec-chart-7)" : "var(--ec-chart-1)"} stroke="var(--ec-bg-surface)" strokeWidth={2} />
+        ) : null,
+      )}
+      <circle cx={cx} cy={cy} r={hole} fill="none" stroke="var(--ec-border)" />
+      {ticks.map((t) => (
+        <circle key={t} cx={cx} cy={cy} r={radius(t)} fill="none" stroke="var(--ec-border)" strokeDasharray="2 3" />
+      ))}
+      {ticks.map((t) => (
+        <text key={t} x={cx} y={cy - radius(t)} textAnchor="middle" dominantBaseline="central" fontSize={12} fill="var(--ec-text-secondary)" stroke="var(--ec-bg-surface)" strokeWidth={4} paintOrder="stroke" strokeLinejoin="round">{fmt(t)}</text>
+      ))}
+      {data.map(([name], i) => {
+        if (i % labelEvery) return null;
+        const a = (i + 0.5) * step;
+        const [x, y] = at(outer + 14, a);
+        const side = Math.sin(a);
+        return (
+          <text key={name} x={x} y={y} textAnchor={Math.abs(side) < 0.3 ? "middle" : side > 0 ? "start" : "end"} dominantBaseline="central" fontSize={12} fill="var(--ec-text-secondary)">{name}</text>
+        );
+      })}
+    </svg>
+  );
+}
 
 export default function PolarPage() {
   return (
@@ -9,6 +60,9 @@ export default function PolarPage() {
       <Section title="컴포넌트">
         <P>전용 컴포넌트는 아직 없습니다. 아래 규칙에 맞춰 직접 구성합니다.</P>
         <P>차트 전체에 공통인 규칙(색, 범례, 설명 상자, 빈 상태)은 차트 기본 규칙을 따릅니다. 이 페이지는 극좌표 차트에만 해당하는 것을 적습니다.</P>
+        <Figure caption="월별 수집 건수(건). 1월이 12시 방향에서 시작해 시계 방향으로 돌고, 12월이 다시 1월과 이웃합니다. 조각의 길이가 값이고, 점선 동심원이 눈금입니다. 설명용 그림입니다. 전용 컴포넌트는 아직 없습니다.">
+          <PolarBars data={monthly} max={1500} ticks={[500, 1000, 1500]} label="열두 달의 수집 건수를 원 둘레에 놓은 극좌표 차트. 7월이 1,490건으로 가장 길고 2월이 760건으로 가장 짧습니다" />
+        </Figure>
       </Section>
 
       <Section title="언제 쓰는가">
@@ -53,6 +107,9 @@ export default function PolarPage() {
             <>원형 눈금과 축 선은 <Code>--ec-border</Code>, 글자는 <Code>--ec-text-secondary</Code>입니다.</>,
           ]}
         />
+        <Figure caption="시간대별 접수 건수(건). 조각이 스물네 개라 이름은 3시간마다 적었고, 가장 큰 10시 조각만 진한 단계로 강조했습니다. 설명용 그림입니다. 전용 컴포넌트는 아직 없습니다.">
+          <PolarBars data={hourly} max={300} ticks={[100, 200, 300]} labelEvery={3} highlight="10시" label="0시부터 23시까지 시간대별 접수 건수를 놓은 극좌표 차트. 10시가 298건으로 가장 길어 진한 색으로 강조했습니다" />
+        </Figure>
       </Section>
 
       <Section title="글자">
@@ -76,6 +133,9 @@ export default function PolarPage() {
       </Section>
 
       <Section title="예외 상황">
+        <Figure caption="요일별 처리 건수(건). 값이 0인 토요일과 값이 없는 일요일은 칠하지 않고 자리를 비워 두었습니다. 다른 조각을 당겨 채우지 않으므로 각도는 그대로입니다. 설명용 그림입니다. 전용 컴포넌트는 아직 없습니다.">
+          <PolarBars data={weekly} max={600} ticks={[200, 400, 600]} size={280} label="월요일부터 일요일까지 처리 건수를 놓은 극좌표 차트. 토요일과 일요일 자리는 비어 있습니다" />
+        </Figure>
         <Rules
           items={[
             "값이 0인 조각은 칠하지 않습니다. 설명 상자에는 0을 적습니다. 0은 데이터입니다.",

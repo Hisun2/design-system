@@ -1,5 +1,5 @@
 import React from "react";
-import { Box, Skeleton, BarChartSkeleton } from "@ec21rnc/ui";
+import { BarChartSkeleton } from "@ec21rnc/ui";
 import { Chart } from "@ec21rnc/ui/chart";
 import { Page, Section, Sub, P, Rules, Table, Demo, DoDont, Code } from "../../kit.jsx";
 
@@ -20,10 +20,13 @@ const missing = [
   { 분기: "3분기", 계약서: null, 견적서: null, 보고서: null },
   { 분기: "4분기", 계약서: 190, 견적서: 110, 보고서: 85 },
 ];
+// 추세선의 점은 계열 이름을 키로 묶습니다. 합계의 추세는 맨 아래 계열(계약서)의 이름으로 줍니다.
 const trend = {
-  추세: [
-    { x: "1분기", y: 250 },
-    { x: "4분기", y: 390 },
+  계약서: [
+    { x: "1분기", y: 263 },
+    { x: "2분기", y: 304 },
+    { x: "3분기", y: 344 },
+    { x: "4분기", y: 385 },
   ],
 };
 const count = (v) => `${Number(v).toLocaleString("ko-KR")}건`;
@@ -33,7 +36,7 @@ export default function StackedBarChartPage() {
     <Page meta={meta} lead="항목마다 여러 계열의 값을 한 막대에 쌓아 그린 차트입니다. 막대 전체의 길이로 합계를, 조각의 길이로 각 계열의 몫을 함께 보여 줍니다.">
       <Section title="언제 쓰는가">
         <Demo caption="분기별 문서 유형별 건수 (type=&quot;stack&quot;)" column>
-          <Chart.Bar data={quarters} groupKey="분기" type="stack" showTotalInTooltip tooltipValueFormatter={count} plotWidth={640} plotHeight={240} aria-label="분기별 문서 유형별 건수" />
+          <Chart.Bar data={quarters} groupKey="분기" yTicksCount={5} type="stack" showTotalInTooltip tooltipValueFormatter={count} plotWidth={640} plotHeight={240} aria-label="분기별 문서 유형별 건수" />
         </Demo>
         <Rules
           items={[
@@ -81,13 +84,14 @@ export default function StackedBarChartPage() {
       </Section>
 
       <Section title="범례와 추세선">
-        <Demo caption="추세선 (trend)" column>
-          <Chart.Bar data={quarters} groupKey="분기" type="stack" trend={trend} plotWidth={640} plotHeight={220} aria-label="추세선이 있는 누적 막대 차트" />
+        <Demo caption="추세선 (trend) — 범례의 &quot;추세&quot;를 누르면 합계의 추세선이 나타나고, 다시 누르면 사라집니다" column>
+          <Chart.Bar data={quarters} groupKey="분기" yTicksCount={5} type="stack" trend={trend} legendProps={{ withTrend: true, trendLabel: "추세" }} plotWidth={640} plotHeight={220} aria-label="추세선이 있는 누적 막대 차트" />
         </Demo>
         <Rules
           items={[
             "계열이 여럿이므로 범례를 항상 둡니다. 범례의 순서는 쌓은 순서와 같게 합니다.",
             <>합계의 흐름을 짚어 주려면 <Code>trend</Code>로 추세선을 겹칩니다. 단순한 차트에서는 어지러워지므로 꼭 필요할 때만 씁니다.</>,
+            <><Code>trend</Code>의 점은 계열 이름을 키로 줍니다. 합계의 추세는 맨 아래 계열의 이름으로 줍니다. 범례 끝에 "추세" 항목이 생기고, 처음에는 꺼져 있습니다.</>,
             "추세선을 넣으면 설명 상자에 각 계열의 값과 추세의 값을 모두 보여 줍니다.",
           ]}
         />
@@ -108,13 +112,13 @@ export default function StackedBarChartPage() {
       <Section title="예외 상황">
         <Sub title="값이 모두 0일 때">
           <Demo column>
-            <Chart.Bar data={zeros} groupKey="분기" type="stack" plotWidth={480} plotHeight={160} aria-label="값이 모두 0인 누적 막대 차트" />
+            <Chart.Bar data={zeros} groupKey="분기" yTicksCount={5} type="stack" plotWidth={480} plotHeight={160} aria-label="값이 모두 0인 누적 막대 차트" />
           </Demo>
           <P>0은 데이터입니다. 축은 그대로 그리고 설명 상자에 0을 적습니다.</P>
         </Sub>
         <Sub title="값이 없는 항목">
           <Demo caption="2분기 견적서와 3분기 전체가 값 없음" column>
-            <Chart.Bar data={missing} groupKey="분기" type="stack" plotWidth={480} plotHeight={180} aria-label="값이 없는 항목이 있는 누적 막대 차트" />
+            <Chart.Bar data={missing} groupKey="분기" yTicksCount={5} type="stack" plotWidth={480} plotHeight={180} aria-label="값이 없는 항목이 있는 누적 막대 차트" />
           </Demo>
           <Rules
             items={[
@@ -132,11 +136,7 @@ export default function StackedBarChartPage() {
         </Sub>
         <Sub title="처음 불러올 때">
           <Demo>
-            <Box w={320}>
-              <Skeleton h={160}>
-                <BarChartSkeleton />
-              </Skeleton>
-            </Box>
+            <BarChartSkeleton w={320} h={160} />
           </Demo>
           <P>
             막대 차트와 같이 <Code>BarChartSkeleton</Code>을 보여 줍니다. 차트 제목이 있으면 제목은 먼저 보여 줍니다.
@@ -147,11 +147,11 @@ export default function StackedBarChartPage() {
       <Section title="쓰는 법">
         <DoDont
           good={{
-            demo: <Chart.Bar data={grouped} groupKey="분기" type="stack" colorMap={{ 기타: "var(--ec-chart-other)" }} showLegend={false} plotWidth={260} plotHeight={160} aria-label="작은 계열을 기타로 묶은 누적 막대 차트" />,
+            demo: <Chart.Bar data={grouped} groupKey="분기" yTicksCount={5} type="stack" colorMap={{ 기타: "var(--ec-chart-other)" }} showLegend={false} plotWidth={260} plotHeight={160} aria-label="작은 계열을 기타로 묶은 누적 막대 차트" />,
             text: "작은 계열은 \"기타\"로 묶어 맨 위에 회색으로 쌓습니다.",
           }}
           bad={{
-            demo: <Chart.Bar data={many} groupKey="분기" type="stack" showLegend={false} plotWidth={260} plotHeight={160} aria-label="계열이 여덟인 누적 막대 차트" />,
+            demo: <Chart.Bar data={many} groupKey="분기" yTicksCount={5} type="stack" showLegend={false} plotWidth={260} plotHeight={160} aria-label="계열이 여덟인 누적 막대 차트" />,
             text: "계열을 일곱 개 넘게 쌓지 않습니다. 색도 조각도 구분되지 않습니다.",
           }}
         />

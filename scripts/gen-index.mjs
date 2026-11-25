@@ -42,6 +42,8 @@ for (const name of readdirSync(ui).sort()) {
 }
 
 files.index.push('export * from "./extras.js";');
+// 차트를 직접 조립할 때 축의 범위를 정하는 도구. 차트 라이브러리가 쓰는 것과 같은 d3-scale입니다.
+files.chart.push('export { scaleLinear, scaleBand, scaleTime, scalePoint, scaleLog, scaleSqrt } from "d3-scale";');
 for (const [file, lines] of Object.entries(files)) {
   const body = header + lines.join("\n") + "\n";
   writeFileSync(join(root, "src", `${file}.js`), body, "utf8");

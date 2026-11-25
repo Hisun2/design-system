@@ -1,6 +1,7 @@
 import React from "react";
-import { scaleLinear } from "d3-scale";
+import { scaleLinear } from "@ec21rnc/ui/chart";
 import { Chart, Plot, Radar } from "@ec21rnc/ui/chart";
+import { Box, Flex } from "@ec21rnc/ui";
 import { Page, Section, Sub, P, Rules, Table, Demo, DoDont, Code } from "../../kit.jsx";
 
 export const meta = { title: "방사형 차트", order: 23 };
@@ -55,7 +56,7 @@ export default function RadarPage() {
 
       <Section title="구성">
         <Demo caption="대상 하나, 항목 다섯" column>
-          <Client><Chart.Radar data={single} groupKey="항목" plotWidth={320} plotHeight={320} showDots aria-label="거래처 가의 항목별 평가" /></Client>
+          <Client><Chart.Radar data={single} groupKey="항목" scale={scale} plotWidth={320} plotHeight={320} showDots aria-label="거래처 가의 항목별 평가" /></Client>
         </Demo>
         <Table
           head={["요소", "규칙"]}
@@ -63,6 +64,7 @@ export default function RadarPage() {
             ["축(항목)", "첫 축은 12시 방향에서 시작하고, 원을 똑같은 각도로 나눕니다. 항목은 3~10개를 권합니다."],
             ["격자", <>축 선과 눈금 선 모두 <Code>--ec-border</Code> 색. 눈금 선은 점선입니다.</>],
             ["눈금", "필요한 만큼만 둡니다. 많으면 읽기 어렵습니다."],
+            ["값의 범위", <>가운데가 0, 바깥 끝이 가장 큰 점수가 되게 <Code>scale</Code>로 정합니다. 정하지 않으면 가장 작은 값이 가운데로 가서 차이가 실제보다 크게 보입니다.</>],
             ["대상(선)", "두께 3px."],
             ["점", "지름 8px, 흰색 테두리 2px."],
             ["면", "선과 같은 색, 불투명도 20%."],
@@ -73,11 +75,17 @@ export default function RadarPage() {
 
       <Section title="격자 모양">
         <Demo caption="다각형 격자(기본) / 원형 격자 (circle)">
-          <Client><Chart.Radar data={compare} groupKey="항목" plotWidth={260} plotHeight={260} showLegend={false} aria-label="다각형 격자" /></Client>
-          <Client><Chart.Radar data={compare} groupKey="항목" circle plotWidth={260} plotHeight={260} showLegend={false} aria-label="원형 격자" /></Client>
+          <Flex gap={6} flexWrap>
+            <Box w={260}>
+              <Client><Chart.Radar data={compare} groupKey="항목" scale={scale} plotWidth={260} plotHeight={260} showLegend={false} aria-label="다각형 격자" /></Client>
+            </Box>
+            <Box w={260}>
+              <Client><Chart.Radar data={compare} groupKey="항목" scale={scale} circle plotWidth={260} plotHeight={260} showLegend={false} aria-label="원형 격자" /></Client>
+            </Box>
+          </Flex>
         </Demo>
         <Demo caption="항목이 세 개일 때 (권장 최소)">
-          <Client><Chart.Radar data={three} groupKey="항목" circle plotWidth={220} plotHeight={220} aria-label="항목이 세 개인 방사형 차트" /></Client>
+          <Client><Chart.Radar data={three} groupKey="항목" scale={scale} circle plotWidth={220} plotHeight={220} aria-label="항목이 세 개인 방사형 차트" /></Client>
         </Demo>
         <Rules
           items={[
@@ -160,7 +168,7 @@ export default function RadarPage() {
 
       <Section title="대상의 수와 범례">
         <Demo caption="대상 둘 — 범례가 필요합니다" column>
-          <Client><Chart.Radar data={compare} groupKey="항목" plotWidth={320} plotHeight={320} showDots aria-label="거래처 가와 나의 항목별 평가" /></Client>
+          <Client><Chart.Radar data={compare} groupKey="항목" scale={scale} plotWidth={320} plotHeight={320} showDots aria-label="거래처 가와 나의 항목별 평가" /></Client>
         </Demo>
         <Rules
           items={[
@@ -187,7 +195,7 @@ export default function RadarPage() {
       <Section title="예외 상황">
         <Sub title="값이 모두 0일 때">
           <Demo column>
-            <Client><Chart.Radar data={zeros} groupKey="항목" plotWidth={240} plotHeight={240} showDots aria-label="값이 모두 0인 방사형 차트" /></Client>
+            <Client><Chart.Radar data={zeros} groupKey="항목" scale={scale} plotWidth={240} plotHeight={240} showDots aria-label="값이 모두 0인 방사형 차트" /></Client>
           </Demo>
           <P>모든 점이 가운데에 모입니다. 0은 데이터이므로 그대로 그립니다.</P>
         </Sub>

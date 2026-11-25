@@ -1,5 +1,5 @@
 import React from "react";
-import { Box, Skeleton, AreaChartSkeleton } from "@ec21rnc/ui";
+import { AreaChartSkeleton } from "@ec21rnc/ui";
 import { Chart, interpolateValue } from "@ec21rnc/ui/chart";
 import { Page, Section, Sub, P, Rules, Table, Demo, DoDont, Code } from "../../kit.jsx";
 
@@ -18,9 +18,9 @@ const monthly = [
 const twoSeries = monthly.map((row, i) => ({ ...row, 처리: 180 + i * 45 }));
 const few = [
   { 월: 1, 수집: 320 },
-  { 월: 4, 수집: 520 },
-  { 월: 8, 수집: 720 },
-  { 월: 12, 수집: 690 },
+  { 월: 3, 수집: 520 },
+  { 월: 6, 수집: 720 },
+  { 월: 9, 수집: 690 },
 ];
 const many = monthly.map((row, i) => ({ 월: row.월, 계약서: 90 + i * 10, 견적서: 70 + (i % 3) * 20, 보고서: 60 + i * 4, 영수증: 50 + (i % 2) * 15, 신청서: 40 + i * 6, 공문: 30 + (i % 4) * 8 }));
 const one = [{ 월: 6, 수집: 580 }];
@@ -38,14 +38,15 @@ const gap = [
   { 월: 6, 수집: 580 },
 ];
 const month = (v) => `${v}월`;
-const axis = { axisXValueFormatter: month, tooltipTitleFormatter: month };
+// 눈금은 값이 있는 달에만 찍고(xTicksCount), 세로 눈금은 다섯 개 안팎으로 줄입니다.
+const axis = { axisXValueFormatter: month, tooltipTitleFormatter: month, yTicksCount: 5 };
 
 export default function AreaChartPage() {
   return (
     <Page meta={meta} lead="시간에 따라 값이 변하는 모습을 선과 그 아래를 채운 면으로 보여 주는 차트입니다. 하나하나의 값보다 전체적인 양과 흐름을 볼 때 씁니다.">
       <Section title="언제 쓰는가">
         <Demo caption="월별 수집 건수" column>
-          <Chart.Area data={monthly} groupKey="월" plotWidth={640} plotHeight={220} {...axis} aria-label="월별 수집 건수" />
+          <Chart.Area data={monthly} groupKey="월" xTicksCount={7} plotWidth={640} plotHeight={220} {...axis} aria-label="월별 수집 건수" />
         </Demo>
         <Table
           head={["보여 주려는 것", "차트"]}
@@ -69,7 +70,7 @@ export default function AreaChartPage() {
 
       <Section title="선과 면">
         <Demo caption="점 표시 (showDots) — 값이 몇 개 없거나 수집 간격이 고르지 않을 때" column>
-          <Chart.Area data={few} groupKey="월" showDots plotWidth={480} plotHeight={200} {...axis} aria-label="점을 표시한 영역 차트" />
+          <Chart.Area data={few} groupKey="월" xTicksCount={8} showDots plotWidth={480} plotHeight={200} {...axis} aria-label="점을 표시한 영역 차트" />
         </Demo>
         <Table
           head={["요소", "모양"]}
@@ -90,7 +91,7 @@ export default function AreaChartPage() {
 
       <Section title="계열이 둘 이상일 때">
         <Demo caption="겹쳐 그리기 (stacked={false}) — 각 계열의 값을 0부터 그립니다" column>
-          <Chart.Area data={twoSeries} groupKey="월" stacked={false} plotWidth={640} plotHeight={220} {...axis} aria-label="월별 수집·처리 건수" />
+          <Chart.Area data={twoSeries} groupKey="월" xTicksCount={7} stacked={false} plotWidth={640} plotHeight={220} {...axis} aria-label="월별 수집·처리 건수" />
         </Demo>
         <Rules
           items={[
@@ -122,19 +123,19 @@ export default function AreaChartPage() {
         </Sub>
         <Sub title="값이 둘일 때">
           <Demo column>
-            <Chart.Area data={two} groupKey="월" showDots xTicksCount={2} plotWidth={320} plotHeight={160} {...axis} aria-label="값이 둘인 영역 차트" />
+            <Chart.Area data={two} groupKey="월" xTicksCount={1} showDots plotWidth={320} plotHeight={160} {...axis} aria-label="값이 둘인 영역 차트" />
           </Demo>
           <P>점을 반드시 표시합니다. 두 날짜가 붙어 있든 멀리 떨어져 있든 같습니다.</P>
         </Sub>
         <Sub title="값이 모두 0일 때">
           <Demo column>
-            <Chart.Area data={zeros} groupKey="월" plotWidth={480} plotHeight={160} {...axis} aria-label="값이 모두 0인 영역 차트" />
+            <Chart.Area data={zeros} groupKey="월" xTicksCount={5} plotWidth={480} plotHeight={160} {...axis} aria-label="값이 모두 0인 영역 차트" />
           </Demo>
           <P>0은 데이터입니다. 선을 0 높이의 축 위에 그립니다. 빈 상태로 바꾸지 않습니다.</P>
         </Sub>
         <Sub title="중간에 값이 없을 때">
           <Demo caption="3~4월 값 없음 — 아는 두 점 사이를 점선으로 잇습니다" column>
-            <Chart.Area data={gap} groupKey="월" stacked={false} showDots plotWidth={480} plotHeight={180} {...axis} aria-label="중간에 값이 없는 영역 차트" />
+            <Chart.Area data={gap} groupKey="월" xTicksCount={5} stacked={false} showDots plotWidth={480} plotHeight={180} {...axis} aria-label="중간에 값이 없는 영역 차트" />
           </Demo>
           <Rules
             items={[
@@ -147,11 +148,7 @@ export default function AreaChartPage() {
         </Sub>
         <Sub title="처음 불러올 때">
           <Demo>
-            <Box w={320}>
-              <Skeleton h={160}>
-                <AreaChartSkeleton />
-              </Skeleton>
-            </Box>
+            <AreaChartSkeleton w={320} h={160} />
           </Demo>
           <P>
             처음 불러오는 동안에는 <Code>AreaChartSkeleton</Code>을 보여 줍니다. 차트 제목이 있으면 제목은 먼저 보여 줍니다. 오류나 데이터 없음 같은 그 밖의 빈 상태는 차트 기본 구조의 빈 상태 규칙을 따릅니다.
@@ -162,11 +159,11 @@ export default function AreaChartPage() {
       <Section title="쓰는 법">
         <DoDont
           good={{
-            demo: <Chart.Area data={twoSeries} groupKey="월" stacked={false} plotWidth={280} plotHeight={160} showLegend={false} {...axis} aria-label="계열이 둘인 영역 차트" />,
+            demo: <Chart.Area data={twoSeries} groupKey="월" xTicksCount={4} stacked={false} plotWidth={280} plotHeight={160} showLegend={false} {...axis} aria-label="계열이 둘인 영역 차트" />,
             text: "계열은 4개까지만 그립니다.",
           }}
           bad={{
-            demo: <Chart.Area data={many} groupKey="월" stacked={false} plotWidth={280} plotHeight={160} showLegend={false} {...axis} aria-label="계열이 여섯인 영역 차트" />,
+            demo: <Chart.Area data={many} groupKey="월" xTicksCount={4} stacked={false} plotWidth={280} plotHeight={160} showLegend={false} {...axis} aria-label="계열이 여섯인 영역 차트" />,
             text: "계열을 많이 겹치지 않습니다. 면이 섞여 어느 것도 읽을 수 없습니다. 꺾은선 차트를 씁니다.",
           }}
         />

@@ -1,7 +1,7 @@
 import React from "react";
-import { Card, Box, Skeleton, LineChartSkeleton, NoData } from "@ec21rnc/ui";
-import { Chart, Plot, XAxis, YAxis, Line, minMax, interpolateValue } from "@ec21rnc/ui/chart";
-import { scaleLinear } from "d3-scale";
+import { Card, Box, LineChartSkeleton, NoData } from "@ec21rnc/ui";
+import { Chart, Plot, XAxis, YAxis, Line, minMax } from "@ec21rnc/ui/chart";
+import { scaleLinear } from "@ec21rnc/ui/chart";
 import { Page, Section, Sub, P, Rules, Table, Demo, DoDont, Code } from "../../kit.jsx";
 
 export const meta = { title: "차트 기본 구조", order: 2 };
@@ -17,8 +17,8 @@ const monthly = [
 const withGap = [
   { 월: 1, 접수: 320 },
   { 월: 2, 접수: 410 },
-  { 월: 3, 접수: interpolateValue },
-  { 월: 4, 접수: interpolateValue },
+  { 월: 3, 접수: null },
+  { 월: 4, 접수: null },
   { 월: 5, 접수: 610 },
   { 월: 6, 접수: 580 },
 ];
@@ -35,6 +35,17 @@ const H = 220;
 const xScale = scaleLinear().range([56, W - 16]).domain(minMax(monthly, "월"));
 const yScale = scaleLinear().range([H - 48, 16]).domain([0, 800]);
 
+// 간편 차트(Chart.Line)의 축을 직접 정합니다. 기본값으로 두면 세 자리 눈금 숫자가 잘리고 "1.5월" 같은 눈금이 생깁니다.
+const lineAxes = (w, h) => ({
+  plotWidth: w,
+  plotHeight: h,
+  xScale: scaleLinear().domain([1, 6]).range([48, w - 24]),
+  yScale: scaleLinear().domain([0, 800]).range([h - 32, 12]),
+  xTicksCount: 5,
+  yTicksCount: 4,
+});
+const gapAxes = lineAxes(480, 180);
+
 export default function ChartBasicsPage() {
   return (
     <Page meta={meta} lead="모든 차트가 함께 쓰는 뼈대입니다. 그리는 자리, 축과 보조선, 설명 상자, 제목, 불러오는 중과 빈 상태의 규칙을 정합니다. 어떤 차트를 고를지는 차트 한눈에 보기를 봅니다.">
@@ -46,7 +57,7 @@ export default function ChartBasicsPage() {
               <Card.Description>올해 상반기에 접수하고 승인한 문서 수입니다.</Card.Description>
             </Card.Header>
             <Card.Body>
-              <Chart.Line data={monthly} groupKey="월" plotWidth={500} plotHeight={220} axisXValueFormatter={month} tooltipTitleFormatter={month} aria-label="월별 문서 처리 건수" />
+              <Chart.Line data={monthly} groupKey="월" {...lineAxes(500, 220)} axisXValueFormatter={month} tooltipTitleFormatter={month} aria-label="월별 문서 처리 건수" />
             </Card.Body>
           </Card>
         </Demo>
@@ -93,11 +104,11 @@ export default function ChartBasicsPage() {
             <YAxis>
               <YAxis.Ticks ticks={[0, 200, 400, 600, 800]} />
               <YAxis.Grid ticks={[0, 200, 400, 600, 800]} />
-              <YAxis.Title>접수 건수</YAxis.Title>
+              <YAxis.Title position="left">접수 건수</YAxis.Title>
             </YAxis>
             <XAxis>
               <XAxis.Ticks ticks={[1, 2, 3, 4, 5, 6]}>{({ value }) => ({ children: month(value) })}</XAxis.Ticks>
-              <XAxis.Title>월</XAxis.Title>
+              <XAxis.Title position="bottom">월</XAxis.Title>
             </XAxis>
             <Line x="월" y="접수">
               <Line.Dots display />
@@ -132,10 +143,10 @@ export default function ChartBasicsPage() {
 
       <Section title="기준선">
         <Demo caption="기준선 (referenceLine) — 4월에 기준이 바뀐 날을 표시" column>
-          <Chart.Line data={monthly} groupKey="월" referenceLine={{ value: 4 }} plotWidth={480} plotHeight={200} axisXValueFormatter={month} tooltipTitleFormatter={month} aria-label="기준선이 있는 월별 문서 처리 건수" />
+          <Chart.Line data={monthly} groupKey="월" referenceLine={{ value: 4 }} {...lineAxes(480, 200)} axisXValueFormatter={month} tooltipTitleFormatter={month} aria-label="기준선이 있는 월별 문서 처리 건수" />
         </Demo>
         <Demo caption="기준 구간 (referenceArea) — 점검 기간에 이름을 붙여 표시" column>
-          <Chart.Line data={monthly} groupKey="월" referenceArea={{ value: [3, 4], title: "점검 기간" }} plotWidth={480} plotHeight={200} axisXValueFormatter={month} tooltipTitleFormatter={month} aria-label="기준 구간이 있는 월별 문서 처리 건수" />
+          <Chart.Line data={monthly} groupKey="월" referenceArea={{ value: [3, 4], title: "점검 기간" }} {...lineAxes(480, 200)} axisXValueFormatter={month} tooltipTitleFormatter={month} aria-label="기준 구간이 있는 월별 문서 처리 건수" />
         </Demo>
         <Rules
           items={[
@@ -160,7 +171,7 @@ export default function ChartBasicsPage() {
 
       <Section title="설명 상자">
         <Demo caption="마우스를 올리면 그 시점의 모든 계열 값과 합계가 나옵니다" column>
-          <Chart.Line data={monthly} groupKey="월" showTotalInTooltip tooltipValueFormatter={count} plotWidth={480} plotHeight={200} axisXValueFormatter={month} tooltipTitleFormatter={month} aria-label="설명 상자에 합계가 나오는 차트" />
+          <Chart.Line data={monthly} groupKey="월" showTotalInTooltip tooltipValueFormatter={count} {...lineAxes(480, 200)} axisXValueFormatter={month} tooltipTitleFormatter={month} aria-label="설명 상자에 합계가 나오는 차트" />
         </Demo>
         <Rules
           items={[
@@ -179,11 +190,24 @@ export default function ChartBasicsPage() {
 
       <Section title="값이 없을 때와 수집을 시작한 때">
         <Demo caption="3~4월 값 없음 — 아는 두 점 사이를 점선으로 잇습니다" column>
-          <Chart.Line data={withGap} groupKey="월" showDots plotWidth={480} plotHeight={180} axisXValueFormatter={month} tooltipTitleFormatter={month} aria-label="중간에 값이 없는 차트" />
+          <Plot data={withGap} scale={[gapAxes.xScale, gapAxes.yScale]} width={480} height={180} aria-label="중간에 값이 없는 차트">
+            <YAxis>
+              <YAxis.Ticks ticks={[0, 200, 400, 600, 800]} />
+              <YAxis.Grid ticks={[0, 200, 400, 600, 800]} />
+            </YAxis>
+            <XAxis>
+              <XAxis.Ticks ticks={[1, 2, 3, 4, 5, 6]}>{({ value }) => ({ children: month(value) })}</XAxis.Ticks>
+            </XAxis>
+            <Line x="월" y="접수">
+              <Line.Null />
+              <Line.Dots display />
+            </Line>
+          </Plot>
         </Demo>
         <Rules
           items={[
-            <>값이 없는 구간은 점선으로 잇습니다. 데이터에서 그 자리의 값을 <Code>interpolateValue</Code>로 넣습니다.</>,
+            <>값이 없는 구간은 회색 점선으로 잇습니다. 데이터에서 그 자리의 값을 <Code>null</Code>로 넣고, 조립 차트의 <Code>Line</Code> 안에 <Code>Line.Null</Code>을 둡니다.</>,
+            <><Code>interpolateValue</Code>를 넣으면 그 자리를 건너뛰고 실선으로 이어 버립니다. 값이 없다는 것이 보이지 않으므로 쓰지 않습니다.</>,
             "0과 값 없음은 다릅니다. 0은 \"0건이었다\"는 데이터이고, 값 없음은 \"모른다\"는 뜻입니다. 값 없는 자리를 0으로 그리지 않습니다.",
             "수집을 시작한 날부터는 실선으로 그립니다. 그날의 설명 상자에 \"이 날부터 수집을 시작했습니다\"라고 적습니다.",
           ]}
@@ -197,9 +221,7 @@ export default function ChartBasicsPage() {
               <Card.Title>월별 문서 처리 건수</Card.Title>
             </Card.Header>
             <Card.Body>
-              <Skeleton h={180}>
-                <LineChartSkeleton />
-              </Skeleton>
+              <LineChartSkeleton h={180} />
             </Card.Body>
           </Card>
         </Demo>

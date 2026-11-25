@@ -1,5 +1,6 @@
 import React from "react";
 import { Chart } from "@ec21rnc/ui/chart";
+import { scaleLinear } from "@ec21rnc/ui/chart";
 import { HistogramChartSkeleton, Box } from "@ec21rnc/ui";
 import { Page, Section, Sub, P, Rules, Table, Demo, DoDont, Code } from "../../kit.jsx";
 
@@ -22,12 +23,21 @@ const skewed = [
   { 구간: "7~8일", 문서: 3 },
 ];
 
+// 세로축을 직접 정합니다. 기본값으로 두면 눈금이 너무 촘촘하고 네 자리 숫자가 잘립니다.
+// top은 세로축의 위 끝, ticks는 눈금 수입니다. 왼쪽 여백(marginY)은 눈금 숫자가 들어갈 자리입니다.
+const axis = (h, top, ticks) => ({
+  plotHeight: h,
+  marginY: 48,
+  yScale: scaleLinear().domain([0, top]).range([h - 30, 10]),
+  yTicksCount: ticks,
+});
+
 export default function HistogramPage() {
   return (
     <Page meta={meta} lead="숫자 데이터를 구간으로 나누고, 구간마다 몇 건이 들어 있는지 막대 길이로 보여 주는 차트입니다. 값이 어디에 몰려 있는지 볼 때 씁니다.">
       <Section title="기본 모양">
         <Demo caption="처리 기간 구간별 문서 수" column>
-          <Chart.Histogram data={days} groupKey="구간" plotWidth={560} plotHeight={220} showLegend={false} aria-label="처리 기간 구간별 문서 수" />
+          <Chart.Histogram data={days} groupKey="구간" plotWidth={560} {...axis(220, 80, 4)} showLegend={false} aria-label="처리 기간 구간별 문서 수" />
         </Demo>
         <Rules
           items={[
@@ -72,7 +82,7 @@ export default function HistogramPage() {
 
       <Section title="튀는 값 다루기">
         <Demo caption="한 구간만 값이 매우 큰 경우 — 작은 막대도 최소 높이로 보입니다" column>
-          <Chart.Histogram data={skewed} groupKey="구간" plotWidth={560} plotHeight={200} showLegend={false} aria-label="값 차이가 큰 히스토그램" />
+          <Chart.Histogram data={skewed} groupKey="구간" plotWidth={560} {...axis(200, 1200, 4)} showLegend={false} aria-label="값 차이가 큰 히스토그램" />
         </Demo>
         <Rules
           items={[
@@ -106,13 +116,13 @@ export default function HistogramPage() {
       <Section title="예외 상황">
         <Sub title="구간이 하나뿐일 때">
           <Demo column>
-            <Chart.Histogram data={one} groupKey="구간" plotWidth={320} plotHeight={180} showLegend={false} aria-label="구간이 하나인 히스토그램" />
+            <Chart.Histogram data={one} groupKey="구간" plotWidth={320} {...axis(180, 50, 5)} showLegend={false} aria-label="구간이 하나인 히스토그램" />
           </Demo>
           <P>막대 하나만 그립니다. 빈 구간을 지어내 채우지 않습니다.</P>
         </Sub>
         <Sub title="값이 모두 0일 때">
           <Demo column>
-            <Chart.Histogram data={zeros} groupKey="구간" plotWidth={560} plotHeight={180} showLegend={false} aria-label="값이 모두 0인 히스토그램" />
+            <Chart.Histogram data={zeros} groupKey="구간" plotWidth={560} {...axis(180, 10, 2)} showLegend={false} aria-label="값이 모두 0인 히스토그램" />
           </Demo>
           <P>0은 데이터입니다. "값 없음"과 다릅니다. 막대는 보이지 않지만 설명 상자에는 0을 적습니다.</P>
         </Sub>

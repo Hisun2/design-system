@@ -66,7 +66,7 @@ export default function ChartColorPage() {
           ]}
         />
         <Demo caption="계열 순서대로 1, 2, 3번 색이 칠해집니다" column>
-          <Chart.Bar data={quarters} groupKey="분기" plotWidth={480} plotHeight={200} aria-label="분기별 문서 유형별 건수" />
+          <Chart.Bar data={quarters} groupKey="분기" yTicksCount={5} plotWidth={480} plotHeight={200} aria-label="분기별 문서 유형별 건수" />
         </Demo>
       </Section>
 
@@ -81,7 +81,7 @@ export default function ChartColorPage() {
           ]}
         />
         <Demo caption="항목이 많으면 큰 것 넷과 &quot;기타&quot;로 묶습니다. 기타는 회색입니다.">
-          <Chart.Donut data={withOther} colorMap={{ 기타: "var(--ec-chart-other)" }} plotWidth={180} plotHeight={180} aria-label="문서 유형별 비중" />
+          <Chart.Donut data={withOther} colorMap={{ 기타: "var(--ec-chart-other)" }} justifyContent="flex-end" plotWidth={188} plotHeight={188} aria-label="문서 유형별 비중" />
         </Demo>
         <Rules
           items={[
@@ -116,6 +116,8 @@ export default function ChartColorPage() {
             data={status}
             groupKey="분기"
             type="stack"
+            yTicksCount={5}
+            maxBarSize={32}
             colorMap={{ 승인: "var(--ec-control-primary-success)", 반려: "var(--ec-control-primary-critical)" }}
             plotWidth={480}
             plotHeight={200}
@@ -150,6 +152,9 @@ export default function ChartColorPage() {
             groupKey="구분"
             type="stack"
             invertAxis
+            marginY={72}
+            maxBarSize={24}
+            xTicksCount={5}
             colorMap={{ "3일 이내": "var(--ec-chart-13)", "7일 이내": "var(--ec-chart-1)", "14일 이내": "var(--ec-chart-7)", "14일 초과": "var(--ec-chart-19)" }}
             plotWidth={480}
             plotHeight={120}
@@ -180,7 +185,7 @@ export default function ChartColorPage() {
 
       <Section title="색을 못 보는 사람도 읽을 수 있게">
         <Demo caption="무늬 채움 (patterns) — 색 없이도 계열이 구분됩니다" column>
-          <Chart.Bar data={quarters} groupKey="분기" patterns plotWidth={480} plotHeight={200} aria-label="무늬로 구분한 분기별 문서 유형별 건수" />
+          <Chart.Bar data={quarters} groupKey="분기" yTicksCount={5} patterns plotWidth={480} plotHeight={200} aria-label="무늬로 구분한 분기별 문서 유형별 건수" />
         </Demo>
         <Rules
           items={[
@@ -195,7 +200,7 @@ export default function ChartColorPage() {
       <Section title="쓰는 법">
         <DoDont
           good={{
-            demo: <Chart.Bar data={teams} groupKey="부서" plotWidth={260} plotHeight={160} aria-label="한 가지 색으로 그린 부서별 건수" />,
+            demo: <Chart.Bar data={teams} groupKey="부서" yTicksCount={5} maxBarSize={24} plotWidth={260} plotHeight={160} aria-label="한 가지 색으로 그린 부서별 건수" />,
             text: "계열이 하나면 모든 막대를 1번 색 하나로 칠합니다.",
           }}
           bad={{
@@ -204,6 +209,8 @@ export default function ChartColorPage() {
                 data={[{ 구분: "건수", 영업: 48, 구매: 36, 재무: 21, 인사: 14 }]}
                 groupKey="구분"
                 showLegend={false}
+                yTicksCount={5}
+                maxBarSize={24}
                 plotWidth={260}
                 plotHeight={160}
                 aria-label="막대마다 색이 다른 부서별 건수"

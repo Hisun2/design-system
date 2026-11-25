@@ -1,28 +1,29 @@
 import React from "react";
-import { Box, Flex, Text, Skeleton, BarChartSkeleton } from "@ec21rnc/ui";
+import { Flex, Text, BarChartSkeleton } from "@ec21rnc/ui";
 import { Chart } from "@ec21rnc/ui/chart";
 import { Page, Section, Sub, P, Rules, Table, Demo, DoDont, Code } from "../../kit.jsx";
 
 export const meta = { title: "누적 가로 막대 차트", order: 16 };
 
+// 가로로 그릴 때 Chart.Bar는 데이터의 첫 항목을 맨 아래에 놓습니다. 합계가 큰 항목이 위로 오도록 작은 것부터 적습니다.
 const teams = [
-  { 부서: "영업", 승인: 320, 검토: 110, 반려: 50 },
-  { 부서: "구매", 승인: 240, 검토: 80, 반려: 40 },
-  { 부서: "재무", 승인: 150, 검토: 40, 반려: 20 },
   { 부서: "인사", 승인: 90, 검토: 35, 반려: 15 },
+  { 부서: "재무", 승인: 150, 검토: 40, 반려: 20 },
+  { 부서: "구매", 승인: 240, 검토: 80, 반려: 40 },
+  { 부서: "영업", 승인: 320, 검토: 110, 반려: 50 },
 ];
 const steps = [
-  { 부서: "영업", "3일 이내": 42, "7일 이내": 31, "14일 이내": 18, "14일 초과": 9 },
-  { 부서: "구매", "3일 이내": 35, "7일 이내": 30, "14일 이내": 22, "14일 초과": 13 },
   { 부서: "재무", "3일 이내": 58, "7일 이내": 25, "14일 이내": 12, "14일 초과": 5 },
+  { 부서: "구매", "3일 이내": 35, "7일 이내": 30, "14일 이내": 22, "14일 초과": 13 },
+  { 부서: "영업", "3일 이내": 42, "7일 이내": 31, "14일 이내": 18, "14일 초과": 9 },
 ];
 const stepColors = { "3일 이내": "var(--ec-chart-13)", "7일 이내": "var(--ec-chart-1)", "14일 이내": "var(--ec-chart-7)", "14일 초과": "var(--ec-chart-19)" };
 const many = teams.map((row, i) => ({ ...row, 보류: 30 + i * 4, 회수: 22 + i * 3, 취소: 18 + i * 2, 만료: 12 + i, 이관: 9 + i }));
-const zeros = teams.slice(0, 3).map((row) => ({ 부서: row.부서, 승인: 0, 검토: 0, 반려: 0 }));
+const zeros = teams.slice(1).map((row) => ({ 부서: row.부서, 승인: 0, 검토: 0, 반려: 0 }));
 const missing = [
-  { 부서: "영업", 승인: 320, 검토: 110, 반려: 50 },
-  { 부서: "구매", 승인: null, 검토: null, 반려: null },
   { 부서: "재무", 승인: 150, 검토: null, 반려: 20 },
+  { 부서: "구매", 승인: null, 검토: null, 반려: null },
+  { 부서: "영업", 승인: 320, 검토: 110, 반려: 50 },
 ];
 const count = (v) => `${Number(v).toLocaleString("ko-KR")}건`;
 const percent = (v) => `${v}%`;
@@ -116,7 +117,7 @@ export default function StackedHorizontalBarChartPage() {
       <Section title="예외 상황">
         <Sub title="항목이 더 없을 때">
           <Demo column>
-            <Chart.Bar data={teams.slice(0, 2)} groupKey="부서" invertAxis type="stack" showXAxis={false} showLegend={false} plotWidth={480} plotHeight={100} aria-label="항목이 둘뿐인 누적 가로 막대 차트" />
+            <Chart.Bar data={teams.slice(2)} groupKey="부서" invertAxis type="stack" showXAxis={false} marginX={0} showLegend={false} plotWidth={480} plotHeight={100} aria-label="항목이 둘뿐인 누적 가로 막대 차트" />
             <Flex mt={8}>
               <Text color="text-secondary">더 이상 결과가 없습니다</Text>
             </Flex>
@@ -145,14 +146,10 @@ export default function StackedHorizontalBarChartPage() {
         </Sub>
         <Sub title="처음 불러올 때">
           <Demo>
-            <Box w={320}>
-              <Skeleton h={160}>
-                <BarChartSkeleton layout="horizontal" />
-              </Skeleton>
-            </Box>
+            <BarChartSkeleton layout="vertical" w={320} h={160} />
           </Demo>
           <P>
-            가로 막대 차트와 같이 <Code>{'<BarChartSkeleton layout="horizontal" />'}</Code>을 보여 줍니다. 차트 제목이 있으면 제목은 먼저 보여 줍니다. 그 밖의 빈 상태는 차트 기본 구조의 빈 상태 규칙을 따릅니다.
+            가로 막대 차트와 같이 <Code>{'<BarChartSkeleton layout="vertical" />'}</Code>을 보여 줍니다. <Code>layout</Code>은 막대가 늘어서는 방향이므로, 가로로 누운 막대는 <Code>vertical</Code>입니다. 차트 제목이 있으면 제목은 먼저 보여 줍니다. 그 밖의 빈 상태는 차트 기본 구조의 빈 상태 규칙을 따릅니다.
           </P>
         </Sub>
       </Section>
