@@ -7,10 +7,10 @@ EC21 R&C 사내 시스템(이노잉, ERP, 모아)이 함께 쓰는 디자인 토
 
 ## 설치
 
-저장소는 비공개입니다. 설치하는 사람의 GitHub 계정에 이 저장소를 볼 권한이 있어야 합니다. 버전은 git 태그로 고정합니다.
+기준 저장소는 조직 계정의 비공개 저장소(EC21RNC-DEV/design-system)입니다. 조직 구성원이면 설치할 수 있습니다. 버전은 git 태그로 고정합니다.
 
 ```sh
-npm install git+https://github.com/Hisun2/design-system.git#v0.1.0
+npm install git+https://github.com/EC21RNC-DEV/design-system.git#v0.1.1
 ```
 
 React 18 또는 19가 필요합니다.

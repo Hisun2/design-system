@@ -22,8 +22,8 @@ export default function DevelopersPage() {
 
       <Section title="설치">
         <P>git 저장소에서 설치합니다. 버전은 태그로 고정합니다. React 18 또는 19가 필요합니다.</P>
-        <P><Code>npm install git+https://github.com/Hisun2/design-system.git#v0.1.0</Code></P>
-        <P>저장소는 비공개입니다. 설치하는 사람의 GitHub 계정에 저장소를 볼 권한이 있어야 합니다.</P>
+        <P><Code>npm install git+https://github.com/EC21RNC-DEV/design-system.git#v0.1.1</Code></P>
+        <P>기준 저장소는 조직 계정의 비공개 저장소입니다. 조직 구성원이면 설치할 수 있습니다.</P>
       </Section>
 
       <Section title="시작하기">
