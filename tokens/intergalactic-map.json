@@ -344,5 +344,6 @@
   "bg-highlight-results": "{bg-warning}",
   "chart-data-total-amount": "{chart-total}",
   "chart-data-other-value": "{chart-other}",
-  "chart-data-null": "{chart-null}"
+  "chart-data-null": "{chart-null}",
+  "badge-bg-invert": "rgba(255, 255, 255, 0.28)"
 }

@@ -61,7 +61,7 @@ export default function BadgePage() {
         <P>기능의 단계는 대부분의 컨트롤 안에 표시할 수 있습니다.</P>
         <Sub title="버튼">
           <Demo>
-            <Button>일괄 승인<Button.Addon><Badge type="beta" /></Button.Addon></Button>
+            <Button><Button.Text>일괄 승인</Button.Text><Button.Addon><Badge type="beta" /></Button.Addon></Button>
           </Demo>
         </Sub>
         <Sub title="Pills">
@@ -114,7 +114,7 @@ export default function BadgePage() {
       <Section title="쓰는 법">
         <DoDont
           good={{
-            demo: <Button>일괄 승인<Button.Addon><Badge type="new" /></Button.Addon></Button>,
+            demo: <Button><Button.Text>일괄 승인</Button.Text><Button.Addon><Badge type="new" /></Button.Addon></Button>,
             text: "기능의 단계를 알릴 때만 붙입니다.",
           }}
           bad={{

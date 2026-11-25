@@ -35,8 +35,8 @@ export default function CounterPage() {
           ]}
         />
         <Demo caption="진한 바탕의 버튼 안에서는 뒤집힌 색이 저절로 적용됩니다">
-          <Button use="primary" theme="info">승인<Button.Addon><Counter>5</Counter></Button.Addon></Button>
-          <Button>필터<Button.Addon><Counter theme="info">3</Counter></Button.Addon></Button>
+          <Button use="primary" theme="info"><Button.Text>승인</Button.Text><Button.Addon><Counter>5</Counter></Button.Addon></Button>
+          <Button><Button.Text>필터</Button.Text><Button.Addon><Counter theme="info">3</Counter></Button.Addon></Button>
         </Demo>
         <P>색은 Counter가 붙는 요소와 상황에 따라 고릅니다. 꾸미려고 색을 바꾸지 않습니다.</P>
       </Section>
@@ -103,11 +103,11 @@ export default function CounterPage() {
       <Section title="쓰는 법">
         <DoDont
           good={{
-            demo: <Button>필터<Button.Addon><Counter theme="info">3</Counter></Button.Addon></Button>,
+            demo: <Button><Button.Text>필터</Button.Text><Button.Addon><Counter theme="info">3</Counter></Button.Addon></Button>,
             text: "글자 오른쪽에 둡니다. 필터에서 고른 수는 파란색으로 보여 줍니다.",
           }}
           bad={{
-            demo: <Button><Button.Addon><Counter theme="danger">3</Counter></Button.Addon>필터</Button>,
+            demo: <Button><Button.Addon><Counter theme="danger">3</Counter></Button.Addon><Button.Text>필터</Button.Text></Button>,
             text: "글자 앞에 두지 않습니다. 한도와 상관없는 숫자에 빨간색을 쓰지 않습니다.",
           }}
         />

@@ -152,10 +152,10 @@ export default function PricingAndSalesPage() {
         />
         <Demo caption="배지는 상태를, 설명 풍선은 까닭을 알립니다">
           <Tooltip title="관리자만 쓸 수 있습니다. 승인 순서를 바꾸려면 부서 관리자에게 요청하세요.">
-            <Button disabled>승인 순서 설정<Button.Addon><Badge type="admin" /></Button.Addon></Button>
+            <Button disabled><Button.Text>승인 순서 설정</Button.Text><Button.Addon><Badge type="admin" /></Button.Addon></Button>
           </Tooltip>
           <Tooltip title="2026-12-15부터 쓸 수 있습니다.">
-            <Button disabled>보고서 예약<Button.Addon><Badge type="soon" /></Button.Addon></Button>
+            <Button disabled><Button.Text>보고서 예약</Button.Text><Button.Addon><Badge type="soon" /></Button.Addon></Button>
           </Tooltip>
         </Demo>
       </Section>

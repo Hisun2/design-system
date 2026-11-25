@@ -346,4 +346,5 @@
   --intergalactic-chart-data-total-amount: var(--ec-chart-total);
   --intergalactic-chart-data-other-value: var(--ec-chart-other);
   --intergalactic-chart-data-null: var(--ec-chart-null);
+  --intergalactic-badge-bg-invert: rgba(255, 255, 255, 0.28);
 }

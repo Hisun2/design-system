@@ -53,8 +53,8 @@ export default function ButtonPage() {
 
       <Section title="덧붙이는 요소">
         <Demo>
-          <Button>필터<Button.Addon><Counter>3</Counter></Button.Addon></Button>
-          <Button>새 기능<Button.Addon><Badge type="new" /></Button.Addon></Button>
+          <Button><Button.Text>필터</Button.Text><Button.Addon><Counter>3</Counter></Button.Addon></Button>
+          <Button><Button.Text>새 기능</Button.Text><Button.Addon><Badge type="new" /></Button.Addon></Button>
           <Tooltip title="설명 풍선에 버튼의 뜻을 적습니다"><Button aria-label="도움말">?</Button></Tooltip>
         </Demo>
         <P>아이콘, 개수(Counter), 배지를 글자 앞뒤에 붙일 수 있습니다. 글자 없이 아이콘만 있는 버튼에는 반드시 설명 풍선을 답니다.</P>
