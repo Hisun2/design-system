@@ -1,0 +1,12 @@
+@import "./fonts.css";
+@import "./generated/tokens.css";
+@import "./generated/theme.css";
+@import "./generated/flags.css";
+
+body {
+  margin: 0;
+  background: var(--ec-bg-page);
+  color: var(--ec-text-primary);
+  font: var(--ec-fs-200) / var(--ec-lh-200) var(--ec-font-family);
+  font-variant-numeric: tabular-nums;
+}

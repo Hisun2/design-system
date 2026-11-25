@@ -1,0 +1,35 @@
+/* 문서 사이트 자체의 틀. 색·크기는 모두 토큰을 씁니다. */
+html { scroll-padding-top: 72px; }
+body { background: var(--ec-bg-surface); }
+.doc-top { height: 56px; border-bottom: 1px solid var(--ec-border); display: flex; align-items: center; gap: 12px; padding: 0 20px; position: sticky; top: 0; background: var(--ec-bg-surface); z-index: 5; }
+.doc-top b { font-size: var(--ec-fs-300); color: var(--ec-brand-navy); }
+.doc-wrap { display: flex; align-items: flex-start; }
+.doc-nav { width: 248px; flex: none; position: sticky; top: 56px; height: calc(100vh - 56px); overflow: auto; padding: 16px 12px 40px; border-right: 1px solid var(--ec-border); }
+.doc-nav h4 { margin: 16px 8px 4px; font-size: var(--ec-fs-100); line-height: var(--ec-lh-100); color: var(--ec-text-secondary); font-weight: var(--ec-fw-bold); }
+.doc-nav a { display: block; padding: 5px 8px; border-radius: var(--ec-radius-control); text-decoration: none; color: var(--ec-text-primary); }
+.doc-nav a:hover { background: var(--ec-overlay-hover); }
+.doc-nav a.on { background: var(--ec-bg-selected); color: var(--ec-text-info); font-weight: var(--ec-fw-medium); }
+.doc-main { flex: 1; min-width: 0; max-width: 920px; padding: 32px 32px 96px; }
+.doc-main h1 { font-size: var(--ec-fs-500); line-height: var(--ec-lh-500); font-weight: var(--ec-fw-bold); margin: 0 0 8px; }
+.doc-main h2 { font-size: var(--ec-fs-400); line-height: var(--ec-lh-400); font-weight: var(--ec-fw-bold); margin: 40px 0 12px; }
+.doc-main h3 { font-size: var(--ec-fs-300); line-height: var(--ec-lh-300); font-weight: var(--ec-fw-bold); margin: 24px 0 8px; }
+.doc-main p { margin: 0 0 12px; line-height: 22px; }
+.doc-lead { color: var(--ec-text-secondary); margin-bottom: 24px !important; }
+.doc-main ul { margin: 0 0 12px; padding-left: 20px; line-height: 22px; }
+.doc-main code { font: 12px/18px Consolas, monospace; background: var(--ec-bg-page); padding: 2px 6px; border-radius: var(--ec-radius-badge); }
+.doc-table-wrap { overflow-x: auto; margin: 8px 0 16px; }
+.doc-table { width: 100%; border-collapse: collapse; }
+.doc-table th { text-align: left; font-weight: var(--ec-fw-regular); color: var(--ec-text-secondary); padding: 8px 12px; border-bottom: 1px solid var(--ec-border); white-space: nowrap; }
+.doc-table td { padding: 10px 12px; border-bottom: 1px solid var(--ec-border); vertical-align: middle; line-height: 22px; }
+.doc-demo { border: 1px solid var(--ec-border); border-radius: var(--ec-radius-card); padding: 24px; margin: 8px 0 16px; display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+.doc-demo.column { flex-direction: column; align-items: stretch; }
+.doc-demo.gray { background: var(--ec-bg-page); border-color: transparent; }
+.doc-demo-cap { flex-basis: 100%; font-size: var(--ec-fs-100); line-height: var(--ec-lh-100); color: var(--ec-text-secondary); }
+.doc-dd { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; margin: 8px 0 16px; }
+.doc-dd > div { border-radius: var(--ec-radius-card); padding: 16px; background: var(--ec-bg-page); border-top: 4px solid var(--ec-control-primary-success); line-height: 22px; }
+.doc-dd > div.bad { border-top-color: var(--ec-control-primary-critical); }
+.doc-dd b { display: block; margin-bottom: 8px; }
+.doc-dd .row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-bottom: 8px; }
+.doc-swatch { display: inline-block; width: 40px; height: 24px; border-radius: var(--ec-radius-control); border: 1px solid var(--ec-border); vertical-align: middle; }
+.doc-failed { color: var(--ec-text-critical); }
+@media (max-width: 860px) { .doc-nav { display: none; } .doc-main { padding: 24px 16px 64px; } }

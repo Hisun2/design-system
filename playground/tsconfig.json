@@ -1,0 +1,25 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "jsx": "react-jsx",
+    "strict": true,
+    "noEmit": true,
+    "skipLibCheck": true,
+    "paths": {
+      "@ec21rnc/ui": [
+        "../src/index.d.ts"
+      ],
+      "@ec21rnc/ui/chart": [
+        "../src/chart.d.ts"
+      ],
+      "@ec21rnc/ui/feedback-form": [
+        "../src/feedback-form.d.ts"
+      ]
+    }
+  },
+  "include": [
+    "typecheck.tsx"
+  ]
+}

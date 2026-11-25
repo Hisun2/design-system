@@ -1,0 +1,19 @@
+/* Spoqa Han Sans Neo (SIL Open Font License 1.1, fonts/OFL.txt). 자주 쓰는 글자만 담은 공식 웹용 파일입니다. */
+@font-face {
+  font-family: "Spoqa Han Sans Neo";
+  font-weight: 400;
+  font-display: swap;
+  src: url("./fonts/SpoqaHanSansNeo-Regular.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Spoqa Han Sans Neo";
+  font-weight: 500;
+  font-display: swap;
+  src: url("./fonts/SpoqaHanSansNeo-Medium.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Spoqa Han Sans Neo";
+  font-weight: 700;
+  font-display: swap;
+  src: url("./fonts/SpoqaHanSansNeo-Bold.woff2") format("woff2");
+}
