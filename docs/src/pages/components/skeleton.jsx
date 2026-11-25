@@ -146,9 +146,9 @@ export default function SkeletonPage() {
 
       <Section title="차트">
         <Demo caption="차트 종류에 맞는 뼈대를 씁니다 — 선 / 막대 / 도넛">
-          <Box w={200} h={120}><LineChartSkeleton /></Box>
-          <Box w={200} h={120}><BarChartSkeleton /></Box>
-          <Box w={120} h={120}><DonutChartSkeleton /></Box>
+          <LineChartSkeleton w={200} h={120} />
+          <BarChartSkeleton w={200} h={120} />
+          <DonutChartSkeleton w={120} h={120} />
         </Demo>
         <Rules
           items={[

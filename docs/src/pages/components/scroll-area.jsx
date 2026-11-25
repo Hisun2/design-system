@@ -73,9 +73,9 @@ export default function ScrollAreaPage() {
         <Demo caption="가로 스크롤 — 폭이 넓은 내용">
           <Box w={280}>
             <ScrollArea shadow>
-              <Flex gap={6} p={3}>
+              <Flex gap={6} p={3} w="max-content">
                 {documents.map((name) => (
-                  <Text key={name} size={200} noWrap>{name}</Text>
+                  <Text key={name} size={200} noWrap flex="0 0 auto">{name}</Text>
                 ))}
               </Flex>
             </ScrollArea>

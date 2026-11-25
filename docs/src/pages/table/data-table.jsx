@@ -426,9 +426,7 @@ export default function DataTablePage() {
 
       <Section title="가로 스크롤">
         <Demo caption="첫 열 고정(fixed: &quot;left&quot;) + 가로 스크롤" column>
-          <Box w={520}>
-            <DataTable aria-label="열이 많은 표" data={wideRows} columns={wideColumns} />
-          </Box>
+          <DataTable aria-label="열이 많은 표" data={wideRows} columns={wideColumns} w={520} />
         </Demo>
         <P>가로 스크롤은 화면 밖에 열이 더 있다는 뜻입니다. 보통 표 아래쪽에 스크롤 막대가 나옵니다. 아래와 같을 때 씁니다.</P>
         <Rules
